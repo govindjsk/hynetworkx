@@ -17,6 +17,10 @@ class Vertex(tuple):
     def label(self):
         return self[1]
 
+    @property
+    def __summary__(self):
+        return self.id
+
     def __repr__(self):
         return 'Vertex({}, {})'.format(self.id, self.label)
 

@@ -43,6 +43,10 @@ class VertexSet(set):
         elements = resolve_elements(elements)
         super(VertexSet, self).__init__(elements)
 
+    @property
+    def __summary__(self):
+        return {v.__summary__ for v in self}
+
     # @classmethod
     # def _wrap_methods(cls, names):
     #     def wrap_method_closure(name):
