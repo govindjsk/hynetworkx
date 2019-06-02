@@ -2,3 +2,4 @@ data
 tests/.pytest_cache
 src/__pycache__
 workshop
+.idea/*
