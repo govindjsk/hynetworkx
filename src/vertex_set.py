@@ -35,7 +35,8 @@ def resolve_elements(elements):
         elements = {Vertex(i, e) for i, e in zip(ids, labels)}
         return elements
     else:
-        raise Exception("Elements should either be vertices (Vertex), or ids (int), or labels (str).")
+        raise Exception("Elements should either be vertices (Vertex),"
+                        " or ids (int), or labels (str).")
 
 
 class VertexSet(set):
@@ -112,25 +113,36 @@ class VertexSet(set):
 #         return item in self.set
 
 
+def generate_monotonic_vertex_set(count: int = None,
+                                  label_prefix: str = None):
+    V = generate_vertex_set(count, (0, count), label_prefix)
+    return V
+
+
 def generate_vertex_set(count: int = None,
                         id_range: tuple = None,
                         label_prefix: str = None,
-                        reserved_ids: set = None) -> VertexSet:
+                        reserved_ids: set = None,
+                        reserved_vertex_sets: set = None) -> VertexSet:
     """
     Generates a set of random vertices.
     :param count: Number of vertices to generate.
     :param id_range: Tuple specifying upper and lower limits (both included) of where vertex ids should lie.
     :param label_prefix: Prefix string to attach to the vertex ids to form vertex labels.
     :param reserved_ids: Set (or iterator) of ids that are already reserved.
+    :param reserved_vertex_sets:
     :return: A set of vertices (a VertexSet object).
     """
     count = count or VERTEX_SET_DEFAULTS['count']
+    reserved_vertex_sets = set(reserved_vertex_sets or [])
     V = VertexSet()
     while len(V) < count:
         v = generate_vertex(id_range, label_prefix, reserved_ids)
         reserved_ids = set(reserved_ids or [])
         reserved_ids.add(v.id)
         V.add(v)
+    if V in reserved_vertex_sets:
+        V = generate_vertex_set(count, id_range, label_prefix, reserved_ids, reserved_vertex_sets)
     return V
 
 
