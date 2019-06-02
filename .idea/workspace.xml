@@ -1,22 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="eae214ea-b560-4020-9512-bbdb6dcda293" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/edge.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/edge_set.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/graph.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/hyperedge_set.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/incidence_matrix.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/test_hyperedge_set.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/test_hypergraph.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/test_incidence_matrix.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hyperedge.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/hyperedge.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hypergraph.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/hypergraph.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/vertex.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/vertex.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/vertex_set.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/vertex_set.py" afterDir="false" />
-    </list>
+    <list default="true" id="eae214ea-b560-4020-9512-bbdb6dcda293" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -28,8 +13,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/utils.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="36">
-              <caret line="2" column="11" lean-forward="true" selection-start-line="2" selection-start-column="11" selection-end-line="2" selection-end-column="11" />
+            <state relative-caret-position="342">
+              <caret line="19" column="28" lean-forward="true" selection-start-line="19" selection-start-column="28" selection-end-line="19" selection-end-column="28" />
             </state>
           </provider>
         </entry>
@@ -106,6 +91,12 @@
               <item name="hynetworkx" type="b2602c69:ProjectViewProjectNode" />
               <item name="hynetworkx" type="462c0819:PsiDirectoryNode" />
               <item name="tests" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="hynetworkx" type="b2602c69:ProjectViewProjectNode" />
+              <item name="hynetworkx" type="462c0819:PsiDirectoryNode" />
+              <item name="tests" type="462c0819:PsiDirectoryNode" />
+              <item name=".pytest_cache" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -285,7 +276,6 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="65" y="-4" width="1301" height="772" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2456964" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -522,8 +512,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/utils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="36">
-          <caret line="2" column="11" lean-forward="true" selection-start-line="2" selection-start-column="11" selection-end-line="2" selection-end-column="11" />
+        <state relative-caret-position="342">
+          <caret line="19" column="28" lean-forward="true" selection-start-line="19" selection-start-column="28" selection-end-line="19" selection-end-column="28" />
         </state>
       </provider>
     </entry>
