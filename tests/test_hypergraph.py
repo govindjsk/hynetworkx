@@ -25,7 +25,14 @@ def test_init_nonempty_hypergraph():
 
 
 def test_incidence_matrix():
-    H = generate_hypergraph(110, 10)
+    H = generate_hypergraph(10, 10)
     print(H.__summary__)
     H.S.pprint(True)
-    assert H.S.shape == (110, 10)
+    assert H.S.shape == (10, 10)
+
+
+def test_adjacency_matrix():
+    H = generate_hypergraph(5, 2)
+    print(H.__summary__)
+    H.A.pprint(True)
+    assert H.A.shape == (5, 5)
