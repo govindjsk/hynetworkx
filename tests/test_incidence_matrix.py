@@ -1,9 +1,10 @@
 from src.incidence_matrix import IncidenceMatrix
-from src.vertex import generate_vertex, Vertex
+from src.vertex import Vertex
 
 
 def test_init_empty():
     S = IncidenceMatrix()
+    print(S)
     S.pprint()
     assert S.shape == (0, 0)
 

@@ -6,7 +6,10 @@ HYPEREDGE_SET_DEFAULTS = {'count': 5}
 class HyperedgeSet(set):
     def __init__(self, hyperedges=None):
         hyperedges = hyperedges or ()
-        hyperedges = {Hyperedge(f) for f in hyperedges}
+        if not all([isinstance(f, Hyperedge) for f in hyperedges]):
+            hyperedges = {Hyperedge(f) for f in hyperedges}
+        elif not isinstance(hyperedges, set):
+            hyperedges = set(hyperedges)
         # assert all([isinstance(f, Hyperedge) for f in hyperedges])
         super(HyperedgeSet, self).__init__(hyperedges)
 
