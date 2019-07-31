@@ -2,8 +2,7 @@ from random import randrange, sample
 
 import numpy as np
 
-from src.vertex_frozenset import VertexFrozenset
-from src.vertex_set import VertexSet, generate_vertex_set
+from .vertex_set import VertexSet, generate_vertex_set
 
 HYPEREDGE_DEFAULTS = {'size_range': (1, 5)}
 
@@ -20,6 +19,9 @@ class Hyperedge(frozenset):
 
     def __str__(self):
         return 'Hyperedge{{{}}}'.format(', '.join(map(str, list(self))))
+
+    def __hash__(self):
+        return frozenset.__hash__(self)
 
     @property
     def __summary__(self):
