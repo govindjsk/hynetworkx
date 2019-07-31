@@ -89,7 +89,7 @@ class Hypergraph(object):
         rows, columns = ([], []) if len(pairs) == 0 else zip(*pairs)
         values = [1]*len(rows)
         matrix = csr_matrix((values, (rows, columns)),
-                            shape=(len(self.V), len(self.F)))
+                            shape=(max(self.V)[0]+1, max(columns)+1))
         # hyperedge_vectors = [f.get_vector(self.vertex_list)
         #                      for f in tqdm(self.hyperedge_list)]
         # incidence_matrix = IncidenceMatrix(hyperedge_vectors, self.vertex_list)
@@ -113,7 +113,7 @@ class Hypergraph(object):
         # print(pairs)
         values = [1] * len(rows)
         matrix = csr_matrix((values, (rows, columns)),
-                            shape=(len(self.V), len(self.V)))
+                            shape=(max(self.V)[0]+1, max(self.V)[0]+1))
         adjacency_matrix = AdjacencyMatrix(matrix, self.vertex_list)
         self._A_computed = True
         self.adjacency_matrix = adjacency_matrix
@@ -134,7 +134,9 @@ def parse_benson_hypergraph(name, base_path=None, ignore_time=True):
     nverts_path = os.path.join(path, name + '-nverts.txt')
     simplices_path = os.path.join(path, name + '-simplices.txt')
     nverts = [int(l.rstrip('\n')) for l in open(nverts_path, 'r')]
-    simplices = [int(l.rstrip('\n')) for l in open(simplices_path, 'r')]
+    # TODO: Remember that we are reindexing vertices to 0-index.
+    #  This has to be followed while initializing labels as well.
+    simplices = [int(l.rstrip('\n'))-1 for l in open(simplices_path, 'r')]
     times = None
     if not ignore_time:
         times_path = os.path.join(path, name + '-times.txt')
