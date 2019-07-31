@@ -1,4 +1,4 @@
-from src.hyperedge import Hyperedge, generate_hyperedge, generate_hyperedge_from_vertices
+from .hyperedge import Hyperedge, generate_hyperedge, generate_hyperedge_from_vertices
 
 HYPEREDGE_SET_DEFAULTS = {'count': 5}
 

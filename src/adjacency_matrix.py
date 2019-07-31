@@ -1,5 +1,5 @@
-from src.utils import print_matrix, _or
-from src.vertex import Vertex
+from .utils import print_matrix, _or
+from .vertex import Vertex
 from scipy.sparse import csr_matrix
 
 

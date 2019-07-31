@@ -1,4 +1,4 @@
-from src.vertex import Vertex, generate_vertex
+from .vertex import Vertex, generate_vertex
 
 VERTEX_SET_DEFAULTS = {'count': 0}
 
@@ -43,6 +43,9 @@ class VertexSet(set):
     def __init__(self, elements=()):
         elements = resolve_elements(elements)
         super(VertexSet, self).__init__(elements)
+
+    def __hash__(self):
+        return frozenset.__hash__(self.elements)
 
     @property
     def __summary__(self):

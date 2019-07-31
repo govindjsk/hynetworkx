@@ -1,8 +1,6 @@
+import os
 from collections import defaultdict
-
-import numpy as np
 from scipy.sparse import csr_matrix
-
 from src.adjacency_matrix import AdjacencyMatrix
 from src.hyperedge_set import HyperedgeSet, generate_hyperedge_set_from_vertices
 from src.incidence_matrix import IncidenceMatrix
@@ -11,6 +9,7 @@ from tqdm import tqdm
 
 HYPERGRAPH_DEFAULTS = {'num_vertices': 5,
                        'num_hyperedges': 10}
+DATA_DEFAULTS = {'base_path_benson': '/home/govindjsk/repos/data/benson/'}
 
 
 class Hypergraph(object):
@@ -90,7 +89,7 @@ class Hypergraph(object):
         rows, columns = ([], []) if len(pairs) == 0 else zip(*pairs)
         values = [1]*len(rows)
         matrix = csr_matrix((values, (rows, columns)),
-                            shape=(len(self.V), len(self.F)))
+                            shape=(max(self.V)[0]+1, max(columns)+1))
         # hyperedge_vectors = [f.get_vector(self.vertex_list)
         #                      for f in tqdm(self.hyperedge_list)]
         # incidence_matrix = IncidenceMatrix(hyperedge_vectors, self.vertex_list)
@@ -111,10 +110,10 @@ class Hypergraph(object):
             pairs += pairlist
 
         rows, columns = ([], []) if len(pairs) == 0 else zip(*pairs)
-        print(pairs)
+        # print(pairs)
         values = [1] * len(rows)
         matrix = csr_matrix((values, (rows, columns)),
-                            shape=(len(self.V), len(self.V)))
+                            shape=(max(self.V)[0]+1, max(self.V)[0]+1))
         adjacency_matrix = AdjacencyMatrix(matrix, self.vertex_list)
         self._A_computed = True
         self.adjacency_matrix = adjacency_matrix
@@ -126,6 +125,36 @@ def generate_hypergraph(num_vertices=None, num_hyperedges=None):
     V = generate_monotonic_vertex_set(num_vertices)
     F = generate_hyperedge_set_from_vertices(V, num_hyperedges)
     H = Hypergraph(V, F)
+    return H
+
+
+def parse_benson_hypergraph(name, base_path=None, ignore_time=True):
+    base_path = base_path or DATA_DEFAULTS['base_path_benson']
+    path = os.path.join(base_path, name)
+    nverts_path = os.path.join(path, name + '-nverts.txt')
+    simplices_path = os.path.join(path, name + '-simplices.txt')
+    nverts = [int(l.rstrip('\n')) for l in open(nverts_path, 'r')]
+    # TODO: Remember that we are reindexing vertices to 0-index.
+    #  This has to be followed while initializing labels as well.
+    simplices = [int(l.rstrip('\n'))-1 for l in open(simplices_path, 'r')]
+    times = None
+    if not ignore_time:
+        times_path = os.path.join(path, name + '-times.txt')
+        times = [l.rstrip('\n') for l in open(times_path, 'r')]
+    labels_path = os.path.join(path, name + '-node-labels.txt')
+    try:
+        labels = [l.rstrip('\n') for l in open(labels_path, 'r')]
+    except FileNotFoundError:
+        print('No labels found.')
+        labels = None
+    vertices = list(sorted(set(simplices)))
+    hyperedges = []
+    curr = 0
+    for nv in nverts:
+        simplices = simplices[curr:]
+        hyperedges.append(simplices[:nv])
+        curr += nv
+    H = Hypergraph(vertices, hyperedges)
     return H
 
 
