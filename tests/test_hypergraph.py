@@ -1,5 +1,6 @@
 from src.hypergraph import Hypergraph, generate_hypergraph, parse_benson_hypergraph
 from src.vertex_set import generate_monotonic_vertex_set
+import pytest
 
 
 def test_init_empty_hypergraph():
@@ -38,9 +39,12 @@ def test_adjacency_matrix():
     assert H.A.shape == (5, 5)
 
 
-def test_parse_benson_hypergraph():
-    name = 'contact-high-school'
+@pytest.mark.parametrize('name, nV, nF', [
+                                          ('contact-high-school', 327, 489),
+                                          ('contact-primary-school', 242, 434),
+                                          ('email-Enron', 148, 114)])
+def test_parse_benson_hypergraph(name, nV, nF):
     H = parse_benson_hypergraph(name)
     print(H.S.shape)
-    assert len(H.V) == 327 and len(H.F) == 489 and \
-           H.S.shape == (327, 489) and H.A.shape == (327, 327)
+    assert max(H.V)[0] + 1 == nV and len(H.F) == nF and \
+           H.S.shape == (nV, nF) and H.A.shape == (nV, nV)
