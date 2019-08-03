@@ -3,12 +3,13 @@
   <component name="ChangeListManager">
     <list default="true" id="eae214ea-b560-4020-9512-bbdb6dcda293" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/adjacency_matrix.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/adjacency_matrix.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/hyperedge.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/hyperedge.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/hyperedge_set.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/hyperedge_set.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/hypergraph.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/hypergraph.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/incidence_matrix.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/incidence_matrix.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/vertex_set.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/vertex_set.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_hyperedge.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_hyperedge.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_hyperedge_set.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_hyperedge_set.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/test_hypergraph.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_hypergraph.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -57,28 +58,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python tests.pytest for test_hypergraph.test_parse_benson_hypergraph">
-    <configuration name="graph" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="hynetworkx" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/workshop" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/workshop/graph.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
+  <component name="RunManager" selected="Python tests.pytest for test_hypergraph.test_induced_graph_nx">
     <configuration name="pytest for test_class_hypergraph.TestHypergraph" type="tests" factoryName="py.test" nameIsGenerated="true">
       <module name="hynetworkx" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -94,7 +74,7 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest for test_hypergraph.test_incidence_matrix" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+    <configuration name="pytest for test_hypergraph.test_induce_graph" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="hynetworkx" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -105,11 +85,11 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_keywords" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test_hypergraph.test_incidence_matrix&quot;" />
+      <option name="_new_target" value="&quot;test_hypergraph.test_induce_graph&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest for test_hypergraph.test_parse_benson_hypergraph" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+    <configuration name="pytest for test_hypergraph.test_induced_graph_nx" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="hynetworkx" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -120,11 +100,11 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_keywords" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test_hypergraph.test_parse_benson_hypergraph&quot;" />
+      <option name="_new_target" value="&quot;test_hypergraph.test_induced_graph_nx&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest in test_hypergraph.py" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+    <configuration name="pytest for test_hypergraph.test_init_nonempty_graph" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="hynetworkx" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -135,11 +115,11 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_keywords" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;$PROJECT_DIR$/tests/test_hypergraph.py&quot;" />
-      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <option name="_new_target" value="&quot;test_hypergraph.test_init_nonempty_graph&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest in test_incidence_matrix.py" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+    <configuration name="pytest for test_hypergraph.test_init_semiempty_graph" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="hynetworkx" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -150,17 +130,32 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_keywords" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;$PROJECT_DIR$/tests/test_incidence_matrix.py&quot;" />
-      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <option name="_new_target" value="&quot;test_hypergraph.test_init_semiempty_graph&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="pytest for test_hypergraph.test_parse_benson_hypergraph_graph" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+      <module name="hynetworkx" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;test_hypergraph.test_parse_benson_hypergraph_graph&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python tests.pytest for test_hypergraph.test_parse_benson_hypergraph" />
-        <item itemvalue="Python tests.pytest in test_hypergraph.py" />
-        <item itemvalue="Python tests.pytest in test_incidence_matrix.py" />
-        <item itemvalue="Python.graph" />
-        <item itemvalue="Python tests.pytest for test_hypergraph.test_incidence_matrix" />
+        <item itemvalue="Python tests.pytest for test_hypergraph.test_induced_graph_nx" />
+        <item itemvalue="Python tests.pytest for test_hypergraph.test_parse_benson_hypergraph_graph" />
+        <item itemvalue="Python tests.pytest for test_hypergraph.test_induce_graph" />
+        <item itemvalue="Python tests.pytest for test_hypergraph.test_init_nonempty_graph" />
+        <item itemvalue="Python tests.pytest for test_hypergraph.test_init_semiempty_graph" />
       </list>
     </recent_temporary>
   </component>
@@ -195,43 +190,24 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/hypergraph.py</url>
-          <line>90</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/src/hypergraph.py</url>
-          <line>88</line>
+          <line>167</line>
           <option name="timeStamp" value="4" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/hypergraph.py</url>
+          <line>153</line>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/tests/test_hypergraph.py</url>
-          <line>46</line>
+          <line>102</line>
           <option name="timeStamp" value="6" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/src/hypergraph.py</url>
-          <line>156</line>
-          <option name="timeStamp" value="7" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/src/hypergraph.py</url>
-          <line>106</line>
-          <option name="timeStamp" value="8" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/src/hypergraph.py</url>
-          <line>111</line>
-          <option name="timeStamp" value="9" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
     <watches-manager>
       <configuration name="tests">
-        <watch expression="max(rows)" language="Python" />
-        <watch expression="matrix.shape" language="Python" />
-        <watch expression="incidence_matrix.shape" language="Python" />
-        <watch expression="max(self.V)" language="Python" />
-        <watch expression="max(columns)" language="Python" />
+        <watch expression="len(H.G.E)" language="Python" />
       </configuration>
     </watches-manager>
   </component>
