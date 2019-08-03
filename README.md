@@ -5,6 +5,10 @@ A network repository that handles graphs, hypergraphs, and network analyses ther
 - `Vertex()`
 - `VertexSet()`
 - `Hyperedge()`
+- `Edge()`
 - `HyperedgeSet()`
+- `EdgeSet()`
 - `IncidenceMatrix()`
+- `AdjacencyMatrix()`
 - `Hypergraph()`
+- `Graph()`
