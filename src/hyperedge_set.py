@@ -1,4 +1,5 @@
 from .hyperedge import Hyperedge, generate_hyperedge, generate_hyperedge_from_vertices
+from src.utils import is_iterable
 
 HYPEREDGE_SET_DEFAULTS = {'count': 5}
 
@@ -6,6 +7,7 @@ HYPEREDGE_SET_DEFAULTS = {'count': 5}
 class HyperedgeSet(set):
     def __init__(self, hyperedges=None):
         hyperedges = hyperedges or ()
+        assert is_iterable(hyperedges), "Hyperedges not iterable: {}".format(hyperedges)
         if not all([isinstance(f, Hyperedge) for f in hyperedges]):
             hyperedges = {Hyperedge(f) for f in hyperedges}
         elif not isinstance(hyperedges, set):

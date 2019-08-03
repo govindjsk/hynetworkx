@@ -27,3 +27,13 @@ def _or(item, generator, args):
         return generator(*args)
     else:
         return item
+
+
+def is_iterable(item):
+    if isinstance(item, str):
+        return False
+    try:
+        list(item)
+        return True
+    except TypeError:
+        return False

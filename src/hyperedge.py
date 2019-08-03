@@ -2,6 +2,7 @@ from random import randrange, sample
 
 import numpy as np
 
+from src.utils import is_iterable
 from .vertex_set import VertexSet, generate_vertex_set
 
 HYPEREDGE_DEFAULTS = {'size_range': (1, 5)}
