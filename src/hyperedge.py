@@ -2,6 +2,7 @@ from random import randrange, sample
 
 import numpy as np
 
+from src.utils import is_iterable
 from .vertex_set import VertexSet, generate_vertex_set
 
 HYPEREDGE_DEFAULTS = {'size_range': (1, 5)}
@@ -32,6 +33,27 @@ class Hyperedge(frozenset):
         return vector
 
 
+class Edge(frozenset):
+    def __new__(cls, elements=()):
+        assert is_iterable(elements), "A non-iterable cannot form an edge: {}".format(elements)
+        assert len(elements) <= 2, "Edge cannot have more than 2 elements."
+        assert len(elements) > 0, "Edge cannot be empty."
+        return super(Edge, cls).__new__(Edge, VertexSet(elements))
+
+    def __repr__(self):
+        return 'Edge{{{}}}'.format(', '.join(map(str, sorted(self))))
+
+    def __str__(self):
+        return 'Edge{{{}}}'.format(', '.join(map(str, sorted(self))))
+
+    def __hash__(self):
+        return frozenset.__hash__(self)
+
+    @property
+    def __summary__(self):
+        return '{' + ', '.join(map(str, sorted([v.id for v in self]))) + '}'
+
+
 def generate_hyperedge(size_range=None,
                        id_range=None,
                        label_prefix=None,
@@ -44,7 +66,7 @@ def generate_hyperedge(size_range=None,
                             id_range,
                             label_prefix,
                             reserved_vertex_ids,
-                            map(VertexSet, reserved_hyperedges))
+                            set(map(VertexSet, reserved_hyperedges)))
     f = Hyperedge(V)
     return f
 
@@ -59,6 +81,14 @@ def generate_hyperedge_from_vertices(vertices,
     if f in reserved_hyperedges:
         f = generate_hyperedge_from_vertices(vertices, size_range, reserved_hyperedges)
     return f
+
+
+def generate_edge_from_vertices(vertices, reserved_edges=None):
+    reserved_edges = set(reserved_edges or [])
+    e = Edge(sample(vertices, 2))
+    if e in reserved_edges:
+        e = generate_edge_from_vertices(vertices, reserved_edges)
+    return e
 
 
 def main():

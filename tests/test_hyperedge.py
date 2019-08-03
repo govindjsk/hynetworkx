@@ -1,6 +1,6 @@
 import pytest
 
-from src.hyperedge import Hyperedge
+from src.hyperedge import Hyperedge, Edge
 from src.vertex import Vertex
 from src.vertex_set import VertexSet
 
@@ -87,6 +87,23 @@ def test_hashability():
 def test_settability():
     f1 = T.vertices_f[1]
     f2 = T.vertices_f[1]
-    F = {f1, Hyperedge([Vertex(0, 'node0')])}
+    F = {f1, f2}
     print(F)
     assert len(F) == 1, 'TODO: Have a separate class for HyperedgeSet and make it id-specific'
+
+
+def test_edge():
+    e1 = Edge((0, 1))
+    print(e1)
+    assert len(e1) == 2
+
+
+def test_singleton_edge():
+    e1 = Edge((0,))
+    print(e1)
+    assert len(e1) == 1
+
+
+def test_empty_edge():
+    with pytest.raises(AssertionError):
+        Edge(tuple([]))

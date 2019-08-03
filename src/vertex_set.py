@@ -44,8 +44,11 @@ class VertexSet(set):
         elements = resolve_elements(elements)
         super(VertexSet, self).__init__(elements)
 
-    def __hash__(self):
-        return frozenset.__hash__(self.elements)
+    def __repr__(self):
+        return 'VertexSet({})'.format(',\n\t\t'.join(map(str, sorted(self))))
+
+    # def __hash__(self):
+    #     return frozenset.__hash__(self.elements)
 
     @property
     def __summary__(self):
