@@ -3,7 +3,7 @@ from collections import defaultdict
 from itertools import combinations
 
 import networkx as nx
-from scipy.sparse import csr_matrix
+from scipy.sparse import csr_matrix, hstack
 from src.adjacency_matrix import AdjacencyMatrix
 from src.hyperedge import Edge
 from src.hyperedge_set import HyperedgeSet, generate_hyperedge_set_from_vertices, EdgeSet, \
@@ -15,11 +15,11 @@ from tqdm import tqdm
 HYPERGRAPH_DEFAULTS = {'num_vertices': 5,
                        'num_hyperedges': 10,
                        'num_edges': 10}
-DATA_DEFAULTS = {'base_path_benson': '/home/govindjsk/repos/data/benson/'}
+DATA_DEFAULTS = {'base_path_benson': '/home/govindjsk/repos/data/benson/hypergraphs/'}
 
 
 class Hypergraph(object):
-    def __init__(self, vertices=None, hyperedges=None):
+    def __init__(self, vertices=None, hyperedges=None, name=None):
         self.vertices = None
         self.vertex_list = None
         self.hyperedge_list = None
@@ -34,6 +34,7 @@ class Hypergraph(object):
         self.V = VertexSet(vertices)
         print('Initializing F')
         self.F = HyperedgeSet(hyperedges)
+        self.name = name
         # print('Computing S')
         # self.__compute_incidence_matrix__()
         # print('Computing A')
@@ -194,29 +195,74 @@ def parse_benson_hypergraph(name, base_path=None, ignore_time=True):
     path = os.path.join(base_path, name)
     nverts_path = os.path.join(path, name + '-nverts.txt')
     simplices_path = os.path.join(path, name + '-simplices.txt')
-    nverts = [int(l.rstrip('\n')) for l in open(nverts_path, 'r')]
+    print('Reading nverts...')
+    nverts = [int(l.rstrip('\n')) for l in tqdm(open(nverts_path, 'r'))]
     # TODO: Remember that we are reindexing vertices to 0-index.
     #  This has to be followed while initializing labels as well.
-    simplices = [int(l.rstrip('\n'))-1 for l in open(simplices_path, 'r')]
+    print('Reading simplices...')
+    simplices = [int(l.rstrip('\n'))-1 for l in tqdm(open(simplices_path, 'r'))]
     times = None
     if not ignore_time:
+        print('Reading times...')
         times_path = os.path.join(path, name + '-times.txt')
-        times = [l.rstrip('\n') for l in open(times_path, 'r')]
+        times = [l.rstrip('\n') for l in tqdm(open(times_path, 'r'))]
     labels_path = os.path.join(path, name + '-node-labels.txt')
     try:
-        labels = [l.rstrip('\n') for l in open(labels_path, 'r')]
+        print('Reading labels...')
+        labels = [l.rstrip('\n') for l in tqdm(open(labels_path, 'r'))]
     except FileNotFoundError:
         print('No labels found.')
         labels = None
     vertices = list(sorted(set(simplices)))
+    n = max(vertices) + 1
     hyperedges = []
+    j = 0
     curr = 0
-    for nv in nverts:
-        simplices = simplices[curr:]
-        hyperedges.append(simplices[:nv])
-        curr += nv
-    H = Hypergraph(vertices, hyperedges)
-    return H
+    print('Parsing simplices...')
+    i = 0
+    # S = csr_matrix(([], ([], [])), shape=(n, 0))
+    for nv in tqdm(nverts):
+        hyperedge = frozenset(simplices[i: i + nv])
+        if hyperedge not in hyperedges:
+            hyperedges.add(hyperedge)
+            # rows.extend(list(hyperedge))
+            # cols.extend([j] * nv)
+            # values =
+            j += 1
+        # hyperedge_vector = csr_matrix(([1]*nv, (hyperedge, [1]*nv)), shape=(n, 1))
+        # S = hstack((S, hyperedge_vector))
+        # hyperedges.append(hyperedge)
+        i += nv
+        # simplices = simplices[curr:]
+        # hyperedges.append(simplices[:nv])
+        # curr += nv
+    m = len(hyperedges)
+    print('Creating hypergraph...')
+    # print(len(nverts), len(rows), len(cols), n, m)
+    # H = Hypergraph(vertices, hyperedges, name)
+    S = csr_matrix(([1]*len(rows), (rows, cols)), shape=(n, m))
+    return S
+
+
+def get_benson_data_names():
+    data_names = ['coauth-DBLP',
+                  'coauth-MAG-Geology',
+                  'coauth-MAG-History',
+                  'congress-bills',
+                  'contact-high-school',
+                  'contact-primary-school',
+                  'DAWN',
+                  'email-Enron',
+                  'email-Eu',
+                  'NDC-classes',
+                  'NDC-substances',
+                  'tags-ask-ubuntu',
+                  'tags-math-sx',
+                  'tags-stack-overflow',
+                  'threads-ask-ubuntu',
+                  'threads-math-sx',
+                  'threads-stack-overflow']
+    return data_names
 
 
 def main():
