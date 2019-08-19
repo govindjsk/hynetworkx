@@ -5,6 +5,8 @@ VERTEX_DEFAULTS = {'id_range': (0, 100),
 
 class Vertex(tuple):
     def __new__(cls, _id: int = 0, label: str = None):
+        if isinstance(_id, tuple):
+            _id, label = _id
         assert isinstance(_id, int), 'Vertex id has to be an integer.'
         assert isinstance(label or '', str), 'Vertex label has to be either None or a string.'
         return super(Vertex, cls).__new__(Vertex, (_id, label))
