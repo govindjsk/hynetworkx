@@ -222,7 +222,7 @@ def get_neg_data(A, A_pos, factor=-1, mode='random'):
                     neg_count += 1
                     pbar.update(1)
             pbar.close()
-            A_neg = csr_matrix(([1] * len(I), (I, J)))
+            A_neg = csr_matrix(([1] * len(I), (I, J)), shape=A.shape)
     return A_neg
 
 

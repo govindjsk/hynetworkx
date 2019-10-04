@@ -1,3 +1,6 @@
+import sys
+sys.path.append("/content/gdrive/My Drive/Colab Notebooks/libraries/")
+sys.path.append("/content/gdrive/My Drive/Colab Notebooks/libraries/hynetworkx")
 import linkpred
 import pandas as pd
 from scipy.sparse import triu
@@ -6,8 +9,6 @@ import pickle
 from tqdm import tqdm_notebook
 import sys
 
-sys.path.append("/content/gdrive/My Drive/Colab Notebooks/libraries/")
-sys.path.append("/content/gdrive/My Drive/Colab Notebooks/libraries/hynetworkx")
 
 base_path = '/content/gdrive/My Drive/Colab Notebooks/data/'
 
@@ -31,7 +32,8 @@ all_predictor_names = ['AdamicAdar',  # 0
                        'SimRank',  # 17
                        ]
 
-# all_predictor_names = ['Random','AdamicAdar', 'CommonNeighbours', 'Cosine', 'DegreeProduct', 'Jaccard', 'Katz', 'SimRank']
+# all_predictor_names = ['Random','AdamicAdar', 'CommonNeighbours', 'Cosine', 'DegreeProduct', 'Jaccard', 'Katz',
+# 'SimRank']
 predictor_abbr_map = {'AdamicAdar': 'AA',
                       'AssociationStrength': 'AS',
                       'CommonNeighbours': 'CN',
