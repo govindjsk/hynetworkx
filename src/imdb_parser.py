@@ -61,6 +61,7 @@ lang_movie_ids = get_lang_movie_ids()
 
 def preprocess_data(an_map, mn_map, my_map, am_df, lang=None,
                     time_range=None, include_zero_years=True):
+    my_map = {m: int(y) for m, y in my_map.items()}
     times = list(my_map.values())
     time_freq = Counter(times)
     zero_time_count = time_freq[0]
