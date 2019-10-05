@@ -1,7 +1,7 @@
 import sys
 sys.path.append("/content/gdrive/My Drive/Colab Notebooks/libraries/")
 sys.path.append("/content/gdrive/My Drive/Colab Notebooks/libraries/hynetworkx")
-import linkpred
+from linkpred import linkpred
 import pandas as pd
 from scipy.sparse import triu
 import networkx as nx
