@@ -83,7 +83,7 @@ def preprocess_data(an_map, mn_map, my_map, am_df, lang=None,
         if st_time > max_time or en_time < min_time:
             print('No movies in time range {}'.format(time_range))
         else:
-            mids = mids.intersection({m for m, y in my_map.items() if min_time <= y <= max_time or y == 0})
+            mids = mids.intersection({m for m, y in my_map.items() if st_time <= y <= en_time or y == 0})
 
     am_df = am_df[(am_df['aid'].isin(aids)) & (am_df['mid'].isin(mids))]
 
