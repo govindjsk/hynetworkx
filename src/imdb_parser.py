@@ -1,3 +1,5 @@
+from collections import Counter
+
 from joblib import Memory
 import os
 import pandas as pd
@@ -57,11 +59,31 @@ def get_lang_movie_ids(languages=None):
 lang_movie_ids = get_lang_movie_ids()
 
 
-def preprocess_data(an_map, mn_map, my_map, am_df, lang=None):
+def preprocess_data(an_map, mn_map, my_map, am_df, lang=None,
+                    time_range=None, include_zero_years=True):
+    times = list(my_map.values())
+    time_freq = Counter(times)
+    zero_time_count = time_freq[0]
+    sorted_times = list(sorted(time_freq))
+    min_time = sorted_times[1] if sorted_times[0] == 0 else sorted_times[1]
+    max_time = sorted_times[-1]
+    print('Existing time range: [{}, {}]. {} movies ({}%) with time=0'.
+          format(min_time, max_time, zero_time_count,
+                 round(zero_time_count * 100.0 / sum(time_freq.values()), 2)))
+
     aids = set(an_map.keys()).intersection(set(am_df['aid']))
     mids = set(mn_map.keys()).intersection(set(am_df['mid']))
     if lang:
         mids = lang_movie_ids[lang].intersection(mids)
+    if not include_zero_years:
+        mids = mids.intersection({m for m, y in my_map.items() if y > 0})
+    if time_range:
+        st_time, en_time = time_range
+        if st_time > max_time or en_time < min_time:
+            print('No movies in time range {}'.format(time_range))
+        else:
+            mids = mids.intersection({m for m, y in my_map.items() if min_time <= y <= max_time or y == 0})
+
     am_df = am_df[(am_df['aid'].isin(aids)) & (am_df['mid'].isin(mids))]
 
     aids = list(sorted(set(am_df['aid'])))
@@ -111,7 +133,7 @@ def sample_pos(A, rho):
 
 
 @memory.cache
-def get_preprocessed_data(lang=None):
+def get_preprocessed_data(lang=None, time_range=None, include_zero_years=True):
     print('Reading actors')
     an_map = read_actors()
     print('Reading movies')
@@ -119,5 +141,6 @@ def get_preprocessed_data(lang=None):
     print('Reading movie_actor data')
     am_df = get_movie_actor_df()
     print('Preprocessing data')
-    an_map, mn_map, my_map, am_df = preprocess_data(an_map, mn_map, my_map, am_df, lang=lang)
+    an_map, mn_map, my_map, am_df = preprocess_data(an_map, mn_map, my_map, am_df, lang,
+                                                    time_range, include_zero_years)
     return an_map, mn_map, my_map, am_df
