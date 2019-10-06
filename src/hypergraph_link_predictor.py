@@ -6,11 +6,17 @@ from collections import defaultdict
 from tqdm import tqdm_notebook
 import sys
 
-from src.data_preparer import S_to_A, S_to_B, incidence_to_hyperedges
 
 sys.path.append("/content/gdrive/My Drive/Colab Notebooks/libraries/")
 sys.path.append("/content/gdrive/My Drive/Colab Notebooks/libraries/hynetworkx")
 base_path = '/content/gdrive/My Drive/Colab Notebooks/data/'
+from hynetworkx.src.data_preparer import S_to_A, S_to_B, incidence_to_hyperedges
+
+from hynetworkx.src.incidence_matrix import parse_benson_incidence_matrix as parse_S
+from hynetworkx.src.data_preparer import *
+from hynetworkx.src.link_predictor import *
+from hynetworkx.src.linkpred_predictor import *
+from hynetworkx.src.hypergraph_link_predictor import *
 
 
 # def hyper_jaccard_min(pairs, S_train):
@@ -24,6 +30,20 @@ base_path = '/content/gdrive/My Drive/Colab Notebooks/data/'
 
 def get_avg(_list):
     return sum(_list) * 1.0 / len(_list) if len(_list) > 0 else 0
+  
+def get_sum(_list):
+    return sum(_list) * 1.0  if len(_list) > 0 else 0
+  
+def get_l11(_list):
+    return sum(np.abs(_list)) * 1.0  if len(_list) > 0 else 0
+  
+def get_l22(_list):
+    return np.sqrt(sum(np.square(_list))) * 1.0  if len(_list) > 0 else 0
+  
+def get_l33(_list):
+    #return math.pow((sum(np.square(_list , 3))), (1/3)) * 1.0  if len(_list) > 0 else 0
+    return np.sqrt(sum(np.square(_list))) * 1.0  if len(_list) > 0 else 0
+  
 
 
 from scipy.sparse import identity as eye
@@ -65,7 +85,7 @@ def hyper_degree_product(pairs, S_train, aggregator='min'):
 
 def hyper_product(pairs, S_train, aggregator='min'):
     #     aggregator = {'min': min, 'max': max, 'avg': get_avg}[aggregator]
-    scores = {'Min': {}, 'Max': {}, 'Avg': {}}
+    scores = {'Min': {}, 'Max': {}, 'Avg': {} , 'Sum': {} , 'L11':{} ,'L22':{},'L33':{}}
     for u, v in tqdm_notebook(pairs, 'Test pair: '):
         hyn_u = incidence_to_hyperedges(S_train[:, S_train[u, :].nonzero()[1]])
         hyn_v = incidence_to_hyperedges(S_train[:, S_train[v, :].nonzero()[1]])
@@ -75,12 +95,17 @@ def hyper_product(pairs, S_train, aggregator='min'):
         scores['Min'][(u, v)] = min(hyper_scores)
         scores['Max'][(u, v)] = max(hyper_scores)
         scores['Avg'][(u, v)] = get_avg(hyper_scores)
+        scores['Sum'][(u, v)] = get_sum(hyper_scores)
+        scores['L11'][(u, v)] = get_l11(hyper_scores)
+        scores['L22'][(u, v)] = get_l22(hyper_scores)
+        scores['L33'][(u, v)] = get_l33(hyper_scores)
+        
     return scores
 
 
 def hyper_pearson(pairs, S_train, aggregator='min'):
     #     aggregator = {'min': min, 'max': max, 'avg': get_avg}[aggregator]
-    scores = {'Min': {}, 'Max': {}, 'Avg': {}}
+    scores = {'Min': {}, 'Max': {}, 'Avg': {} , 'Sum':{}, 'L11':{} ,'L22':{},'L33':{}}
     for u, v in tqdm_notebook(pairs, 'Test pair: '):
         hyn_u = incidence_to_hyperedges(S_train[:, S_train[u, :].nonzero()[1]])
         hyn_v = incidence_to_hyperedges(S_train[:, S_train[v, :].nonzero()[1]])
@@ -90,12 +115,16 @@ def hyper_pearson(pairs, S_train, aggregator='min'):
         scores['Min'][(u, v)] = min(hyper_scores)
         scores['Max'][(u, v)] = max(hyper_scores)
         scores['Avg'][(u, v)] = get_avg(hyper_scores)
+        scores['Sum'][(u, v)] = get_sum(hyper_scores)
+        scores['L11'][(u, v)] = get_l11(hyper_scores)
+        scores['L22'][(u, v)] = get_l22(hyper_scores)
+        scores['L33'][(u, v)] = get_l33(hyper_scores)
     return scores
 
 
 def hyper_common_neighbour(pairs, S_train, aggregator='min'):
     #     aggregator = {'min': min, 'max': max, 'avg': get_avg}[aggregator]
-    scores = {'Min': {}, 'Max': {}, 'Avg': {}}
+    scores = {'Min': {}, 'Max': {}, 'Avg': {} , 'Sum':{}, 'L11':{} ,'L22':{},'L33':{}}
     for u, v in tqdm_notebook(pairs, 'Test pair: '):
         hyn_u = incidence_to_hyperedges(S_train[:, S_train[u, :].nonzero()[1]])
         hyn_v = incidence_to_hyperedges(S_train[:, S_train[v, :].nonzero()[1]])
@@ -105,12 +134,16 @@ def hyper_common_neighbour(pairs, S_train, aggregator='min'):
         scores['Min'][(u, v)] = min(hyper_scores)
         scores['Max'][(u, v)] = max(hyper_scores)
         scores['Avg'][(u, v)] = get_avg(hyper_scores)
+        scores['Sum'][(u, v)] = get_sum(hyper_scores)
+        scores['L11'][(u, v)] = get_l11(hyper_scores)
+        scores['L22'][(u, v)] = get_l22(hyper_scores)
+        scores['L33'][(u, v)] = get_l33(hyper_scores)
     return scores
 
 
 def hyper_min_overlap(pairs, S_train, aggregator='min'):
     #     aggregator = {'min': min, 'max': max, 'avg': get_avg}[aggregator]
-    scores = {'Min': {}, 'Max': {}, 'Avg': {}}
+    scores = {'Min': {}, 'Max': {}, 'Avg': {},'Sum':{}, 'L11':{} ,'L22':{},'L33':{}}
     for u, v in tqdm_notebook(pairs, 'Test pair: '):
         hyn_u = incidence_to_hyperedges(S_train[:, S_train[u, :].nonzero()[1]])
         hyn_v = incidence_to_hyperedges(S_train[:, S_train[v, :].nonzero()[1]])
@@ -120,12 +153,16 @@ def hyper_min_overlap(pairs, S_train, aggregator='min'):
         scores['Min'][(u, v)] = min(hyper_scores)
         scores['Max'][(u, v)] = max(hyper_scores)
         scores['Avg'][(u, v)] = get_avg(hyper_scores)
+        scores['Sum'][(u, v)] = get_sum(hyper_scores)
+        scores['L11'][(u, v)] = get_l11(hyper_scores)
+        scores['L22'][(u, v)] = get_l22(hyper_scores)
+        scores['L33'][(u, v)] = get_l33(hyper_scores)
     return scores
 
 
 def hyper_max_overlap(pairs, S_train, aggregator='min'):
     #     aggregator = {'min': min, 'max': max, 'avg': get_avg}[aggregator]
-    scores = {'Min': {}, 'Max': {}, 'Avg': {}}
+    scores = {'Min': {}, 'Max': {}, 'Avg': {} , 'Sum':{}, 'L11':{} ,'L22':{},'L33':{}}
     for u, v in tqdm_notebook(pairs, 'Test pair: '):
         hyn_u = incidence_to_hyperedges(S_train[:, S_train[u, :].nonzero()[1]])
         hyn_v = incidence_to_hyperedges(S_train[:, S_train[v, :].nonzero()[1]])
@@ -135,12 +172,16 @@ def hyper_max_overlap(pairs, S_train, aggregator='min'):
         scores['Min'][(u, v)] = min(hyper_scores)
         scores['Max'][(u, v)] = max(hyper_scores)
         scores['Avg'][(u, v)] = get_avg(hyper_scores)
+        scores['Sum'][(u, v)] = get_sum(hyper_scores)
+        scores['L11'][(u, v)] = get_l11(hyper_scores)
+        scores['L22'][(u, v)] = get_l22(hyper_scores)
+        scores['L33'][(u, v)] = get_l33(hyper_scores)
     return scores
 
 
 def hyper_jaccard(pairs, S_train, aggregator='min'):
     #     aggregator = {'min': min, 'max': max, 'avg': get_avg}[aggregator]
-    scores = {'Min': {}, 'Max': {}, 'Avg': {}}
+    scores = {'Min': {}, 'Max': {}, 'Avg': {} ,'Sum':{}, 'L11':{} ,'L22':{},'L33':{}}
     for u, v in tqdm_notebook(pairs, 'Test pair: '):
         hyn_u = incidence_to_hyperedges(S_train[:, S_train[u, :].nonzero()[1]])
         hyn_v = incidence_to_hyperedges(S_train[:, S_train[v, :].nonzero()[1]])
@@ -150,12 +191,16 @@ def hyper_jaccard(pairs, S_train, aggregator='min'):
         scores['Min'][(u, v)] = min(hyper_scores)
         scores['Max'][(u, v)] = max(hyper_scores)
         scores['Avg'][(u, v)] = get_avg(hyper_scores)
+        scores['Sum'][(u, v)] = get_sum(hyper_scores)
+        scores['L11'][(u, v)] = get_l11(hyper_scores)
+        scores['L22'][(u, v)] = get_l22(hyper_scores)
+        scores['L33'][(u, v)] = get_l33(hyper_scores)
     return scores
 
 
 def hyper_association_strength(pairs, S_train, aggregator='min'):
     #     aggregator = {'min': min, 'max': max, 'avg': get_avg}[aggregator]
-    scores = {'Min': {}, 'Max': {}, 'Avg': {}}
+    scores = {'Min': {}, 'Max': {}, 'Avg': {} , 'Sum':{}, 'L11':{} ,'L22':{},'L33':{}}
     for u, v in tqdm_notebook(pairs, 'Test pair: '):
         hyn_u = incidence_to_hyperedges(S_train[:, S_train[u, :].nonzero()[1]])
         hyn_v = incidence_to_hyperedges(S_train[:, S_train[v, :].nonzero()[1]])
@@ -165,12 +210,16 @@ def hyper_association_strength(pairs, S_train, aggregator='min'):
         scores['Min'][(u, v)] = min(hyper_scores)
         scores['Max'][(u, v)] = max(hyper_scores)
         scores['Avg'][(u, v)] = get_avg(hyper_scores)
+        scores['Sum'][(u, v)] = get_sum(hyper_scores)
+        scores['L11'][(u, v)] = get_l11(hyper_scores)
+        scores['L22'][(u, v)] = get_l22(hyper_scores)
+        scores['L33'][(u, v)] = get_l33(hyper_scores)
     return scores
 
 
 def hyper_cosine(pairs, S_train, aggregator='min'):
     #     aggregator = {'min': min, 'max': max, 'avg': get_avg}[aggregator]
-    scores = {'Min': {}, 'Max': {}, 'Avg': {}}
+    scores = {'Min': {}, 'Max': {}, 'Avg': {},'Sum':{}, 'L11':{} ,'L22':{},'L33':{}}
     for u, v in tqdm_notebook(pairs, 'Test pair: '):
         hyn_u = incidence_to_hyperedges(S_train[:, S_train[u, :].nonzero()[1]])
         hyn_v = incidence_to_hyperedges(S_train[:, S_train[v, :].nonzero()[1]])
@@ -180,12 +229,16 @@ def hyper_cosine(pairs, S_train, aggregator='min'):
         scores['Min'][(u, v)] = min(hyper_scores)
         scores['Max'][(u, v)] = max(hyper_scores)
         scores['Avg'][(u, v)] = get_avg(hyper_scores)
+        scores['Sum'][(u, v)] = get_sum(hyper_scores)
+        scores['L11'][(u, v)] = get_l11(hyper_scores)
+        scores['L22'][(u, v)] = get_l22(hyper_scores)
+        scores['L33'][(u, v)] = get_l33(hyper_scores)
     return scores
 
 
 def hyper_n_measure(pairs, S_train, aggregator='min'):
     #     aggregator = {'min': min, 'max': max, 'avg': get_avg}[aggregator]
-    scores = {'Min': {}, 'Max': {}, 'Avg': {}}
+    scores = {'Min': {}, 'Max': {}, 'Avg': {} , 'Sum':{}, 'L11':{} ,'L22':{},'L33':{}}
     for u, v in tqdm_notebook(pairs, 'Test pair: '):
         hyn_u = incidence_to_hyperedges(S_train[:, S_train[u, :].nonzero()[1]])
         hyn_v = incidence_to_hyperedges(S_train[:, S_train[v, :].nonzero()[1]])
@@ -195,6 +248,10 @@ def hyper_n_measure(pairs, S_train, aggregator='min'):
         scores['Min'][(u, v)] = min(hyper_scores)
         scores['Max'][(u, v)] = max(hyper_scores)
         scores['Avg'][(u, v)] = get_avg(hyper_scores)
+        scores['Sum'][(u, v)] = get_sum(hyper_scores)
+        scores['L11'][(u, v)] = get_l11(hyper_scores)
+        scores['L22'][(u, v)] = get_l22(hyper_scores)
+        scores['L33'][(u, v)] = get_l33(hyper_scores)
     return scores
 
 
@@ -339,7 +396,7 @@ def get_all_hpear_scores(hyn_u, hyn_v, n):
 
 def hyper_adamic_adar(pairs, S_train, aggregator='min'):
     #     aggregator = {'min': min, 'max': max, 'avg': get_avg}[aggregator]
-    scores = {'Min': {}, 'Max': {}, 'Avg': {}}
+    scores = {'Min': {}, 'Max': {}, 'Avg': {} , 'Sum':{}, 'L11':{} ,'L22':{},'L33':{}}
     hyd_array = S_train.sum(axis=1)
     for u, v in tqdm_notebook(pairs, 'Test pair: '):
         hyn_u = incidence_to_hyperedges(S_train[:, S_train[u, :].nonzero()[1]])
@@ -350,6 +407,10 @@ def hyper_adamic_adar(pairs, S_train, aggregator='min'):
         scores['Min'][(u, v)] = min(hyper_scores)
         scores['Max'][(u, v)] = max(hyper_scores)
         scores['Avg'][(u, v)] = get_avg(hyper_scores)
+        scores['Sum'][(u, v)] = get_sum(hyper_scores)
+        scores['L11'][(u, v)] = get_l11(hyper_scores)
+        scores['L22'][(u, v)] = get_l22(hyper_scores)
+        scores['L33'][(u, v)] = get_l33(hyper_scores)
     return scores
 
 
@@ -387,35 +448,89 @@ def get_all_aa_scores(hyn_u, hyn_v, hyd_array):
 all_hypergraph_score_names = ['HyperJaccardMin',  # 0
                               'HyperJaccardMax',  # 1
                               'HyperJaccardAvg',  # 2
+                              'HyperJaccardSum',  # 2
+                              'HyperJaccardL11',  # 2
+                              'HyperJaccardL22',  # 2
+                              'HyperJaccardL33',  # 2
+                              
                               'HyperAdamicAdarMin',  # 3
                               'HyperAdamicAdarMax',  # 4
                               'HyperAdamicAdarAvg',  # 5
+                              'HyperAdamicAdarSum',  # 5
+                               'HyperAdamicAdarL11',  # 2
+                              'HyperAdamicAdarL22',  # 2
+                              'HyperAdamicAdarL33',  # 2
+                              
                               'HyperDegreeProductAvg',  # 6
                               'HyperProductMin',  # 7
                               'HyperProductMax',  # 8
                               'HyperProductAvg',  # 9
+                              'HyperProductSum',  # 9
+                             'HyperProductL11',  # 8
+                              'HyperProductL22',  # 9
+                              'HyperProductL33',  # 9
+                              
+                              
                               'HyperPearsonMin',  # 10
                               'HyperPearsonMax',  # 11
                               'HyperPearsonAvg',  # 12
+                              'HyperPearsonSum',  # 12
+                               'HyperPearsonL11',  # 8
+                              'HyperPearsonL22',  # 9
+                              'HyperPearsonL33',  # 9
+                              
+                              
                               'HyperAssociationStrengthMin',  # 13
                               'HyperAssociationStrengthMax',  # 14
                               'HyperAssociationStrengthAvg',  # 15
+                              'HyperAssociationStrengthSum',  # 15
+                              'HyperAssociationStrengthL11',  # 8
+                              'HyperAssociationStrengthL22',  # 9
+                              'HyperAssociationStrengthL33',  # 9
+                              
                               'HyperCosineMin',  # 16
                               'HyperCosineMax',  # 17
                               'HyperCosineAvg',  # 18
+                              'HyperCosineSum',  # 18
+                              'HyperCosineL11',  # 8
+                              'HyperCosineL22',  # 9
+                              'HyperCosineL33',  # 9
+                              
+                              
                               'HyperNMeasureMin',  # 19
                               'HyperNMeasureMax',  # 20
                               'HyperNMeasureAvg',  # 21
+                              'HyperNMeasureSum',  # 21
+                              'HyperNMeasureL11',  # 8
+                              'HyperNMeasureL22',  # 9
+                              'HyperNMeasureL33',  # 9
+                              
+                              
                               'HyperKatzAvg',  # 22
                               'HyperCommonNeighbourMin',  #
                               'HyperCommonNeighbourMax',  #
                               'HyperCommonNeighbourAvg',
+                              'HyperCommonNeighbourSum',
+                              'HyperCommonNeighbourL11',  # 8
+                              'HyperCommonNeighbourL22',  # 9
+                              'HyperCommonNeighbourL33',  # 9
+                              
                               'HyperMinOverlapMin',  #
                               'HyperMinOverlapMax',  #
                               'HyperMinOverlapAvg',
+                              'HyperMinOverlapSum',
+                              'HyperMinOverlapL11',  # 8
+                              'HyperMinOverlapL22',  # 9
+                              'HyperMinOverlapL33',  # 9
+                              
+                              
                               'HyperMaxOverlapMin',  #
                               'HyperMaxOverlapMax',  #
                               'HyperMaxOverlapAvg',
+                              'HyperMaxOverlapSum',
+                              'HyperMaxOverlapL11',  # 8
+                              'HyperMaxOverlapL22',  # 9
+                              'HyperMaxOverlapL33',  # 9
 
                               ]
 
@@ -423,35 +538,84 @@ all_hypergraph_score_names = ['HyperJaccardMin',  # 0
 hypergraph_score_abbr_map = {'HyperJaccardMin': 'HJCm',
                              'HyperJaccardMax': 'HJCM',
                              'HyperJaccardAvg': 'HJCa',
+                             'HyperJaccardSum': 'HJCs',
+                             'HyperJaccardL11': 'HJCl1',
+                             'HyperJaccardL22': 'HJCl2',
+                             'HyperJaccardL33': 'HJCl3',
+                             
                              'HyperAdamicAdarMin': 'HAAm',
                              'HyperAdamicAdarMax': 'HAAM',
                              'HyperAdamicAdarAvg': 'HAAa',
+                             'HyperAdamicAdarSum': 'HAAs',
+                             'HyperAdamicAdarL11': 'HAAl1',
+                             'HyperAdamicAdarL22': 'HAAl2',
+                             'HyperAdamicAdarL33': 'HAAl3',
+                             
                              'HyperDegreeProductAvg': 'HDPa',
                              'HyperProductMin': 'HPm',
                              'HyperProductMax': 'HPM',
                              'HyperProductAvg': 'HPa',
+                             'HyperProductSum': 'HPs',
+                             'HyperProductL11': 'HPl1',
+                             'HyperProductL22': 'HPl2',
+                             'HyperProductL33': 'HPl3',
+                             
                              'HyperPearsonMin': 'HPearm',
                              'HyperPearsonMax': 'HPearM',
                              'HyperPearsonAvg': 'HPeara',
+                             'HyperPearsonSum': 'HPears',
+                             'HyperPearsonL11': 'HPearl1',
+                             'HyperPearsonL22': 'HPearl2',
+                             'HyperPearsonL33': 'HPearl3',
+                             
                              'HyperAssociationStrengthMin': 'HASm',
                              'HyperAssociationStrengthMax': 'HASM',
                              'HyperAssociationStrengthAvg': 'HASa',
+                             'HyperAssociationStrengthSum': 'HASs',
+                             'HyperAssociationStrengthL11': 'HASl1',
+                             'HyperAssociationStrengthL22': 'HASl2',
+                             'HyperAssociationStrengthL33': 'HASl3',
+                             
                              'HyperCosineMin': 'HCosm',
                              'HyperCosineMax': 'HCosM',
                              'HyperCosineAvg': 'HCosa',
+                             'HyperCosineSum': 'HCoss',
+                             'HyperCosineL11': 'HCosl1',
+                             'HyperCosineL22': 'HCosl2',
+                             'HyperCosineL33': 'HCosl3',
+                             
                              'HyperNMeasureMin': 'HNMm',
                              'HyperNMeasureMax': 'HNMM',
                              'HyperNMeasureAvg': 'HNMa',
+                             'HyperNMeasureSum': 'HNMs',
+                             'HyperNMeasureL11': 'HNMl1',
+                             'HyperNMeasureL22': 'HNMl2',
+                             'HyperNMeasureL33': 'HNMl3',
+                             
                              'HyperKatzAvg': 'HKz',
                              'HyperCommonNeighbourMin': 'HCNm',
                              'HyperCommonNeighbourMax': 'HCNM',
                              'HyperCommonNeighbourAvg': 'HCNa',
+                             'HyperCommonNeighbourSum': 'HCNs',
+                             'HyperCommonNeighbourL11': 'HCNl1',
+                             'HyperCommonNeighbourL22': 'HCNl2',
+                             'HyperCommonNeighbourL33': 'HCNl3',
+                             
                              'HyperMinOverlapMin': 'Hminom',  #
                              'HyperMinOverlapMax': 'HminoM',  #
                              'HyperMinOverlapAvg': 'HminoA',
+                             'HyperMinOverlapSum': 'Hminos',
+                             'HyperMinOverlapL11': 'Hminol1',
+                             'HyperMinOverlapL22': 'Hminol2',
+                             'HyperMinOverlapL33': 'Hminol3',
+                             
                              'HyperMaxOverlapMin': 'Hmaxom',  #
                              'HyperMaxOverlapMax': 'HmaxoM',  #
                              'HyperMaxOverlapAvg': 'HmaxoA',
+                             'HyperMaxOverlapSum': 'Hmaxos',
+                              'HyperMaxOverlapL11': 'Hmaxol1',
+                             'HyperMaxOverlapL22': 'Hmaxol2',
+                             'HyperMaxOverlapL33': 'Hmaxol3',
 
                              }
 
@@ -467,7 +631,6 @@ scoring_function_map = {'HyperJaccard': hyper_jaccard,
                         'HyperCommonNeighbour': hyper_common_neighbour,
                         'HyperMinOverlap': hyper_min_overlap,
                         'HyperMaxOverlap': hyper_max_overlap,
-
                         }
 
 
@@ -482,7 +645,7 @@ def get_hypergraph_scores(lp_data, score_indices=None):
     test_pairs = list(zip(I, J))
     scores = {}
     for i in tqdm_notebook(range(len(base_score_names)), 'Hypergraph score: '):
-        # print(len(base_score_names))
+        #print(base_score_names)
         base_name = base_score_names[i]
         # print(base_name)
         scoring_function = scoring_function_map[base_name]
@@ -490,6 +653,7 @@ def get_hypergraph_scores(lp_data, score_indices=None):
         base_scores = scoring_function(test_pairs, S_train)
         for prefix in base_scores:
             score_name = base_name + prefix
+            #print(score_name)
             abbr = hypergraph_score_abbr_map[score_name]
             scores[abbr] = base_scores[prefix]
     scores_df = pd.DataFrame(scores)
