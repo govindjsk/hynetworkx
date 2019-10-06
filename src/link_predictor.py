@@ -69,3 +69,5 @@ def store_scores_and_label(lp_data, data_name, split_mode,
     pickle.dump(pair_label_tuples, open(file_prefix + 'pair_labels.pkl', 'wb'))
     store_linkpred_scores(G_train, test_pairs, file_prefix, linkpred_indices)
     store_hypergraph_scores(lp_data['S_train'], test_pairs, file_prefix, hypergraph_score_indices)
+
+

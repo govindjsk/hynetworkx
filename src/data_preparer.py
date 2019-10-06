@@ -41,6 +41,7 @@ def prepare_temporal_lp_data(S, times, rho, neg_ratio=-1, mode='random'):
     S_train = S[:, [j for j, t in enumerate(times) if t <= train_end_time]]
     lp_data = {'S_train': S_train, 'A_train': A_train,
                'A_test_pos': A_test_pos, 'A_test_neg': A_test_neg}
+    assert ((lp_data['A_test_pos'] + lp_data['A_test_neg']) > 1).nnz == 0, "Negative test pairs overlap with positive."
     return lp_data
 
 
@@ -60,6 +61,7 @@ def prepare_structural_lp_data(S, rho, neg_ratio=-1, mode='random'):
     S_train = clean_train_hypergraph(S, A_test_pos)
     lp_data = {'S_train': S_train, 'A_train': A_train,
                'A_test_pos': A_test_pos, 'A_test_neg': A_test_neg}
+    assert ((lp_data['A_test_pos'] + lp_data['A_test_neg']) > 1).nnz == 0, "Negative test pairs overlap with positive."
     return lp_data
 
 

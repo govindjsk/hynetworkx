@@ -3,11 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="eae214ea-b560-4020-9512-bbdb6dcda293" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/adjacency_matrix.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/adjacency_matrix.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hypergraph.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/hypergraph.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data_preparer.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_preparer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/incidence_matrix.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/incidence_matrix.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/vertex.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/vertex.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/link_predictor.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/link_predictor.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -35,8 +33,16 @@
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../linkpred" />
+    <property name="settings.editor.selected.configurable" value="PyConsoleConfigurable.Python Console" />
+  </component>
+  <component name="PyConsoleOptionsProvider">
+    <option name="myPythonConsoleState">
+      <console-settings module-name="hynetworkx" is-module-sdk="true">
+        <option name="myUseModuleSdk" value="true" />
+        <option name="myModuleName" value="hynetworkx" />
+      </console-settings>
+    </option>
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -206,8 +212,8 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/incidence_matrix.py</url>
-          <line>128</line>
-          <option name="timeStamp" value="7" />
+          <line>147</line>
+          <option name="timeStamp" value="8" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

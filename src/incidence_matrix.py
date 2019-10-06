@@ -136,19 +136,15 @@ def parse_benson_incidence_matrix(name, base_path=None, ignore_time=True):
     print(len(rows), len(cols), n, m)
     matrix = csr_matrix(([1] * len(rows), (rows, cols)), shape=(n, m))
     vertex_list = [Vertex(i, labels[i]) for i in tqdm_notebook(range(len(labels)))]
-    print('Creating incidence matrix...')
-    S = IncidenceMatrix(matrix, vertex_list)
+
     print('Recalculating hyperedge times...')
-    hyperedge_times = [min(hyperedge_times_map[hyperedge_list[j]]) for j in tqdm_notebook(range(S.shape[1]))]
-    # for j in tqdm(range(S.shape[1])):
-    #     hyperedge = hyperedge_list[j]
-    #     time = min(hyperedge_times_map[hyperedge])
-    #     hyperedge_times.append(time)
-    return S, np.array(hyperedge_times)
+    hyperedge_times = [min(hyperedge_times_map[hyperedge_list[j]]) for j in tqdm_notebook(range(matrix.shape[1]))]
+    id_label_map = {v.id: v.label for v in vertex_list}
+    return matrix, np.array(hyperedge_times), id_label_map
 
 
 def main():
-    S, times = parse_benson_incidence_matrix('email-Enron', ignore_time=False)
+    S, times, id_label_map = parse_benson_incidence_matrix('email-Enron', ignore_time=False)
     print(S.shape)
 
 
