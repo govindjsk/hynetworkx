@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 import pandas as pd
 from sklearn.metrics import precision_score, recall_score
 from sklearn.model_selection import train_test_split
@@ -5,6 +7,8 @@ import xgboost as xgb
 from sklearn.naive_bayes import GaussianNB
 from sklearn.tree import DecisionTreeClassifier
 
+from src.experimenter import classifier_params, data_params, perform_classification, lp_data_params, lp_params, lp_cols, \
+    hyper_cols, metrics
 from src.link_predictor import get_perf_df
 
 
@@ -62,3 +66,33 @@ def classify(lp_results, predictor_cols, classifier, random_state=42, iter_var=0
         # print(perf_df)
         # rmse = np.sqrt(mean_squared_error(y, preds))
         # return perf_df, feat_imp_df, df[[classifier]]
+
+
+def find_feat_imp(data_names, split_modes, feature_combinations_map, metrics, classifier, path):
+    classifier_params['classifier'] = classifier
+    tables = {}
+    for split_mode in split_modes:
+        tables[split_mode] = {comb_name: defaultdict(list) for comb_name in feature_combinations_map}
+        data_params['split_mode'] = split_mode
+        for data_name in data_names:
+            data_params['data_name'] = data_name
+            for comb_name, comb in feature_combinations_map.items():
+                # tables[split_mode][comb_name] = defaultdict(list)
+                classifier_params['features'] = comb
+                perf_df, feat_imp, _ = perform_classification(data_params, lp_data_params, lp_params, classifier_params,
+                                                              random_state=42)
+                print(feat_imp.sort_values(["importance"], axis=0, ascending=False))
+
+
+def main():
+    random_state = 42
+    data_names = ['email-Enron', 'contact-high-school']
+    split_modes = ['structural', 'temporal']
+    find_feat_imp(data_names, split_modes, {('full', 'G'): lp_cols,
+                                            ('full', 'H'): hyper_cols,
+                                            ('full', 'G+H'): lp_cols + hyper_cols},
+                  metrics, 'xgboost', path='perf/classifier/{}'.format('full'))
+
+
+if __name__ == '__main__':
+    main()

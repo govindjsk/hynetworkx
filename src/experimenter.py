@@ -1,6 +1,8 @@
 from collections import defaultdict
 
 import pandas as pd
+from scipy.stats import kendalltau
+import numpy as np
 
 from src.data_preparer import filter_size, prepare_lp_data
 from src.hypergraph_link_predictor import get_hypergraph_scores
@@ -181,6 +183,24 @@ def populate_and_store_tables(data_names, split_modes, predictor_cols, metrics, 
     return tables
 
 
+def find_rank_correlation_matrix(data_params, lp_data_params, lp_params):
+    perf_df, a, b = perform_link_prediction(data_params, lp_data_params, lp_params)
+    df = b['scores']
+    colss = df.columns
+    mat = np.zeros((len(colss), len(colss)))
+    ii = 0
+    for i in colss:
+        jj = 0
+        for j in colss:
+            df1 = df[[i]]
+            df2 = df[[j]]
+            coef, p = kendalltau(df1, df2)
+            mat[ii][jj] = coef
+            jj = jj + 1
+        ii = ii + 1
+    return mat
+
+
 def main():
     lp_tables = populate_and_store_tables(data_names, split_modes, lp_cols, metrics, 'perf/graph')
     hyg_tables = populate_and_store_tables(data_names, split_modes, hyper_cols, metrics, 'perf/hypergraph')
@@ -189,6 +209,23 @@ def main():
         path_name = 'perf/combined/{}'.format(combination_name)
         mkdir_p(os.path.join(base_path, 'tables', path_name))
         combined_tables[combination_name] = populate_and_store_tables(data_names, split_modes, cols, metrics, path_name)
+
+    mcm = mixed_combinations_map
+    iter_var = 5
+    random_list = [65, 26, 17, 98, 21]
+    for j in range(iter_var):
+        random_state = random_list[j]
+        for i in lp_cols[:]:
+            a = populate_and_store_classifier_tables(data_names, split_modes, {(i, 'G'): [i],
+                                                                               (i, 'H'): mcm[i][1:],
+                                                                               (i, 'G+H'): mcm[i]},
+                                                     metrics, 'xgboost', path='perf/classifier/{}'.format(i),
+                                                     random_state=random_state, iter_var=j)
+        a = populate_and_store_classifier_tables(data_names, split_modes, {('full', 'G'): lp_cols,
+                                                                           ('full', 'H'): hyper_cols,
+                                                                           ('full', 'G+H'): lp_cols + hyper_cols},
+                                                 metrics, 'xgboost', path='perf/classifier/{}'.format('full'),
+                                                 random_state=30, iter_var=j)
 
 
 if __name__ == '__main__':
