@@ -31,54 +31,55 @@ def filter_time(S, times, min_time=-1, max_time=-1):
     return S, times
 
 
-def prepare_temporal_lp_data(S, times, rho, neg_ratio=-1, mode='random'):
+def prepare_temporal_lp_data(S, weighted ,times, rho, neg_ratio=-1, mode='random'):
     print('Generating A and edge-times...')
-    A, edge_time_map = S_to_A_timed(S, times)
+    A, edge_time_map = S_to_A_timed(S,weighted, times)
     print('Splitting train-test...')
-    A_train, A_test_pos, train_end_time = split_train_test_temporal(A, edge_time_map, rho)
+    A_train,A_test, A_test_pos, train_end_time = split_train_test_temporal(A,weighted, edge_time_map, rho)
     print('Generating negative data')
     A_test_neg = get_neg_data(A, A_test_pos, neg_ratio, mode)
     S_train = S[:, [j for j, t in enumerate(times) if t <= train_end_time]]
-    lp_data = {'S_train': S_train, 'A_train': A_train,
+    lp_data = {'S_train': S_train, 'A_train': A_train,'A_test': A_test,
                'A_test_pos': A_test_pos, 'A_test_neg': A_test_neg}
-    assert ((lp_data['A_test_pos'] + lp_data['A_test_neg']) > 1).nnz == 0, "Negative test pairs overlap with positive."
+   # assert ((lp_data['A_test_pos'] + lp_data['A_test_neg']) > 1).nnz == 0, "Negative test pairs overlap with positive."
     return lp_data
 
 
-def prepare_lp_data(S, times, rho, neg_ratio=-1, mode='random'):
+def prepare_lp_data(S, weighted,times, rho, neg_ratio=-1, mode='random'):
     if all([x == 0 for x in times]):
         print('Going for a structural split')
-        return prepare_structural_lp_data(S, rho, neg_ratio, mode)
+        return prepare_structural_lp_data(S,weighted, rho, neg_ratio, mode)
     else:
         print('Going for a temporal split')
-        return prepare_temporal_lp_data(S, times, rho, neg_ratio, mode)
+        return prepare_temporal_lp_data(S,weighted, times, rho, neg_ratio, mode)
 
 
-def prepare_structural_lp_data(S, rho, neg_ratio=-1, mode='random'):
-    A = S_to_A(S)
-    A_train, A_test_pos = split_train_test(A, rho)
+def prepare_structural_lp_data(S,weighted, rho, neg_ratio=-1, mode='random'):
+    A = S_to_A(S,weighted)
+    A_train, A_test, A_test_pos = split_train_test(A,weighted, rho)
     A_test_neg = get_neg_data(A, A_test_pos, neg_ratio, mode)
     S_train = clean_train_hypergraph(S, A_test_pos)
-    lp_data = {'S_train': S_train, 'A_train': A_train,
+    lp_data = {'S_train': S_train, 'A_train': A_train, 'A_test': A_test,
                'A_test_pos': A_test_pos, 'A_test_neg': A_test_neg}
-    assert ((lp_data['A_test_pos'] + lp_data['A_test_neg']) > 1).nnz == 0, "Negative test pairs overlap with positive."
+    #assert ((lp_data['A_test_pos'] + lp_data['A_test_neg']) > 1).nnz == 0, "Negative test pairs overlap with positive."
     return lp_data
 
 
-def S_to_A(S):
+def S_to_A(S,weighted):
     A = S * S.T
-    A[A > 0] = 1
+    if (weighted==False):
+        A[A > 0] = 1
     A.setdiag(0)
     A.eliminate_zeros()
     return A
 
 
-def S_to_B(S):
-    return S_to_A(S.T)
+def S_to_B(S,weighted = False):
+    return S_to_A(S.T,weighted)
 
 
-def S_to_A_timed(S, times):
-    A = S_to_A(S)
+def S_to_A_timed(S,weighted, times ):
+    A = S_to_A(S,weighted)
     I, J = triu(A).nonzero()
     edges = list(zip(I, J))
     edge_time_map = {}
@@ -99,21 +100,37 @@ def S_to_A_timed(S, times):
     return A, edge_time_map
 
 
-def split_train_test(A, rho):
-    I, J = triu(A).nonzero()
-    edges = set(zip(I, J))
-    test_edges = random.sample(edges, int(rho * len(edges)))
-    test_I, test_J = zip(*test_edges)
-    A_test = csr_matrix(([1] * len(test_I + test_J), (test_I + test_J, test_J + test_I)), shape=A.shape)
-    train_edges = edges.difference(test_edges)
-    train_I, train_J = zip(*train_edges)
-    A_train = csr_matrix(([1] * len(train_I + train_J), (train_I + train_J, train_J + train_I)), shape=A.shape)
-    assert ((A_train + A_test) != A).nnz == 0, "Error in train-test split"
-    A_test_pos = A_test
-    return A_train, A_test_pos
+def split_train_test(A,weighted, rho):
+    if (weighted == False):
+        I, J = triu(A).nonzero()
+        edges = set(zip(I, J))
+        #print(edges)
+        test_edges = random.sample(edges, int(rho * len(edges)))
+        test_I, test_J = zip(*test_edges)
+        A_test = csr_matrix(([1] * len(test_I + test_J), (test_I + test_J, test_J + test_I)), shape=A.shape)
+        train_edges = edges.difference(test_edges)
+        train_I, train_J = zip(*train_edges)
+        A_train = csr_matrix(([1] * len(train_I + train_J), (train_I + train_J, train_J + train_I)), shape=A.shape)
+        assert ((A_train + A_test) != A).nnz == 0, "Error in train-test split"
+        A_test_pos = A_test
+        return A_train, A_test, A_test_pos
+    elif (weighted == True):
+        I, J = triu(A).nonzero()
+        edges = set(zip(I, J))
+        test_edges = random.sample(edges, int(rho * len(edges)))
+        test_I, test_J = zip(*test_edges)
+        test_V = [A[i, j] for i, j in zip(test_I, test_J)] + [A[j, i] for i, j in zip(test_I, test_J)]        
+        A_test = csr_matrix((test_V, (test_I + test_J, test_J + test_I)), shape=A.shape)
+        train_edges = edges.difference(test_edges)
+        train_I, train_J = zip(*train_edges)
+        train_V = [A[i, j] for i, j in zip(train_I, train_J)] + [A[j, i] for i, j in zip(train_I, train_J)]
+        A_train = csr_matrix((train_V, (train_I + train_J, train_J + train_I)), shape=A.shape)
+        assert ((A_train + A_test) != A).nnz == 0, "Error in train-test split"
+        A_test_pos = A_test
+        return A_train, A_test, A_test_pos
 
 
-def split_train_test_temporal(A, edge_time_map, rho):
+def split_train_test_temporal(A,weighted, edge_time_map, rho):
     timestamps = list(sorted(set(edge_time_map.values())))
     start_time, end_time = timestamps[0], timestamps[-1]
     duration = end_time - start_time
@@ -122,16 +139,29 @@ def split_train_test_temporal(A, edge_time_map, rho):
 
     train_edges = [e for e in edge_time_map if edge_time_map[e] <= train_end_time]
     test_edges = [e for e in edge_time_map if edge_time_map[e] > train_end_time]
+    
+    if(weighted == False):
 
-    test_I, test_J = zip(*test_edges)
-    A_test = csr_matrix(([1] * len(test_I + test_J), (test_I + test_J, test_J + test_I)), shape=A.shape)
-    train_I, train_J = zip(*train_edges)
-    A_train = csr_matrix(([1] * len(train_I + train_J), (train_I + train_J, train_J + train_I)), shape=A.shape)
-    assert ((A_train + A_test) != A).nnz == 0, "Error in train-test split"
-    A_test_pos = A_test
-    return A_train, A_test_pos, train_end_time
+        test_I, test_J = zip(*test_edges)
+        A_test = csr_matrix(([1] * len(test_I + test_J), (test_I + test_J, test_J + test_I)), shape=A.shape)
+        train_I, train_J = zip(*train_edges)
+        A_train = csr_matrix(([1] * len(train_I + train_J), (train_I + train_J, train_J + train_I)), shape=A.shape)
+        assert ((A_train + A_test) != A).nnz == 0, "Error in train-test split"
+        A_test_pos = A_test
+        return A_train,A_test, A_test_pos, train_end_time
+        
+    if(weighted == True):
 
-
+        test_I, test_J = zip(*test_edges)
+        test_V = [A[i, j] for i, j in zip(test_I, test_J)] + [A[j, i] for i, j in zip(test_I, test_J)]        
+        A_test = csr_matrix((test_V, (test_I + test_J, test_J + test_I)), shape=A.shape)
+        train_I, train_J = zip(*train_edges)
+        train_V = [A[i, j] for i, j in zip(train_I, train_J)] + [A[j, i] for i, j in zip(train_I, train_J)]
+        A_train = csr_matrix((train_V, (train_I + train_J, train_J + train_I)), shape=A.shape)
+        assert ((A_train + A_test) != A).nnz == 0, "Error in train-test split"        
+        A_test_pos = A_test
+        return A_train ,A_test,A_test_pos, train_end_time
+        
 def remove_singleton_columns(X):
     x = X.sum(axis=0)
     X = X[:, (x > 1).nonzero()[1]]

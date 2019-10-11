@@ -7,6 +7,10 @@ from src.adjacency_matrix import AdjacencyMatrix
 from .utils import print_matrix, _or, get_printable_matrix
 from .vertex import Vertex
 from scipy.sparse import csr_matrix
+from joblib import Memory
+data_path = '/content/gdrive/My Drive/Colab Notebooks/data/'
+cachedir = os.path.join(data_path, 'cache')
+memory = Memory(cachedir, verbose=0)
 
 DATA_DEFAULTS = {'base_path_benson': '/home/govinds/Downloads/'}
 
@@ -81,7 +85,7 @@ def get_benson_incidence_matrix(name, base_path=None, ignore_time=True, force_pa
     f.close()
     return S
 
-
+@memory.cache
 def parse_benson_incidence_matrix(name, base_path=None, ignore_time=True):
     base_path = base_path or DATA_DEFAULTS['base_path_benson']
     path = os.path.join(base_path, name)

@@ -1,3 +1,7 @@
+import errno
+import os
+
+
 def get_printable_matrix(A, row_labels=None):
     A_str = ''
     A = A.toarray()
@@ -16,7 +20,7 @@ def get_printable_matrix(A, row_labels=None):
             for i, AAA in enumerate(AA[:-1]):
                 w1 = max([len(str(s)) for s in A[:, i]])
                 A_str += str(AAA) + ' ' * (w1 - len(str(AAA)) + 1)
-            w1 = max([len(str(s)) for s in A[:, -1]]) if A.shape[0]*A.shape[1] > 0 else 1
+            w1 = max([len(str(s)) for s in A[:, -1]]) if A.shape[0] * A.shape[1] > 0 else 1
             A_str += str(AA[-1]) + ' ' * (w1 - len(str(AA[-1])))
             A_str += ' '
             A_str += u'\u2502' + '\n'
@@ -43,3 +47,17 @@ def is_iterable(item):
         return True
     except TypeError:
         return False
+
+
+def get_data_abbr(data_name):
+    return ''.join([x[0].upper() + x[1].lower() for x in data_name.split('-')])
+
+
+def mkdir_p(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc:  # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
