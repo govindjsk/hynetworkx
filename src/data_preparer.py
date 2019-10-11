@@ -5,9 +5,9 @@ from collections import defaultdict
 from tqdm import tqdm_notebook
 import sys
 
-sys.path.append("/content/gdrive/My Drive/Colab Notebooks/libraries/")
-sys.path.append("/content/gdrive/My Drive/Colab Notebooks/libraries/hynetworkx")
-base_path = '/content/gdrive/My Drive/Colab Notebooks/data/'
+from src.utils import get_base_path
+
+base_path = get_base_path()
 
 
 def filter_size(X, times, min_size=0, max_size=-1):

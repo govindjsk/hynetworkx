@@ -1,14 +1,17 @@
+import os
 import sys
 
-sys.path.append("/content/gdrive/My Drive/Colab Notebooks/libraries/")
-sys.path.append("/content/gdrive/My Drive/Colab Notebooks/libraries/hynetworkx")
+from src.utils import get_library_path
+
+library_path = get_library_path()
+sys.path.append(library_path)
+sys.path.append(os.path.join(library_path, 'hynetworkx'))
 from linkpred import linkpred
 import pandas as pd
 from scipy.sparse import triu
 import networkx as nx
 import pickle
 from tqdm import tqdm_notebook
-import sys
 
 base_path = '/content/gdrive/My Drive/Colab Notebooks/data/'
 

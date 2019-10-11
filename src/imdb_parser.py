@@ -7,7 +7,9 @@ from tqdm import tqdm_notebook
 from scipy.sparse import csr_matrix, triu
 import random
 
-data_path = '/content/gdrive/My Drive/Colab Notebooks/data/imdb'
+from src.utils import get_base_path
+
+data_path = os.path.join(get_base_path(), 'imdb')
 file_names = {'names': 'name_basics.tsv', 'titles': 'title_basics.tsv', 'name_title': 'title_principals.tsv',
               'title_akas': 'title_akas.tsv'}
 cachedir = os.path.join(data_path, 'cache')

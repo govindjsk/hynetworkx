@@ -7,9 +7,13 @@ import pickle
 from sklearn.metrics import roc_auc_score, precision_score, recall_score, fbeta_score
 from tqdm import tqdm_notebook
 import sys
-sys.path.append("/content/gdrive/My Drive/Colab Notebooks/libraries/")
-sys.path.append("/content/gdrive/My Drive/Colab Notebooks/libraries/hynetworkx")
-base_path = '/content/gdrive/My Drive/Colab Notebooks/data/'
+
+from .utils import get_library_path, get_base_path
+
+library_path = get_library_path()
+sys.path.append(library_path)
+sys.path.append(os.path.join(library_path, "hynetworkx"))
+base_path = get_base_path()
 
 from src.hypergraph_link_predictor import store_hypergraph_scores
 from src.linkpred_predictor import store_linkpred_scores

@@ -61,3 +61,11 @@ def mkdir_p(path):
             pass
         else:
             raise
+
+
+def get_base_path():
+    return '/home/govinds/repos/data/'
+
+
+def get_library_path():
+    return '/home/govinds/repos/'

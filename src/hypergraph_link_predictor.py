@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import pandas as pd
 from scipy.sparse import triu
@@ -7,10 +9,12 @@ from tqdm import tqdm_notebook
 import sys
 
 from src.data_preparer import S_to_A, S_to_B, incidence_to_hyperedges
+from src.utils import get_library_path, get_base_path
 
-sys.path.append("/content/gdrive/My Drive/Colab Notebooks/libraries/")
-sys.path.append("/content/gdrive/My Drive/Colab Notebooks/libraries/hynetworkx")
-base_path = '/content/gdrive/My Drive/Colab Notebooks/data/'
+library_path = get_library_path()
+sys.path.append(library_path)
+sys.path.append(os.path.join(library_path, "hynetworkx"))
+base_path = get_base_path()
 
 
 # def hyper_jaccard_min(pairs, S_train):

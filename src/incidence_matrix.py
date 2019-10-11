@@ -4,11 +4,11 @@ from collections import defaultdict
 from tqdm import tqdm, tqdm_notebook
 import numpy as np
 from src.adjacency_matrix import AdjacencyMatrix
-from .utils import print_matrix, _or, get_printable_matrix
+from .utils import print_matrix, _or, get_printable_matrix, get_base_path
 from .vertex import Vertex
 from scipy.sparse import csr_matrix
 from joblib import Memory
-data_path = '/content/gdrive/My Drive/Colab Notebooks/data/'
+data_path = get_base_path()
 cachedir = os.path.join(data_path, 'cache')
 memory = Memory(cachedir, verbose=0)
 
