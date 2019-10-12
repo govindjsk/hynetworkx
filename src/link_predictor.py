@@ -5,7 +5,7 @@ import os
 import networkx as nx
 import pickle
 from sklearn.metrics import roc_auc_score, precision_score, recall_score, fbeta_score
-from tqdm import tqdm_notebook
+from tqdm import tqdm
 import sys
 
 from .utils import get_library_path, get_base_path
@@ -68,7 +68,7 @@ def store_scores_and_label(lp_data, data_name, split_mode,
     pos_pairs = set(zip(*triu(lp_data['A_test_pos']).nonzero()))
     neg_pairs = set(zip(*triu(lp_data['A_test_neg']).nonzero()))
     test_pairs = list(pos_pairs.union(neg_pairs))
-    pair_label_tuples = [(pair, 1 if pair in pos_pairs else 0) for pair in tqdm_notebook(test_pairs)]
+    pair_label_tuples = [(pair, 1 if pair in pos_pairs else 0) for pair in tqdm(test_pairs)]
 
     pickle.dump(pair_label_tuples, open(file_prefix + 'pair_labels.pkl', 'wb'))
     store_linkpred_scores(G_train, test_pairs, file_prefix, linkpred_indices)

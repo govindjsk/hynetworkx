@@ -5,7 +5,7 @@ import pandas as pd
 from scipy.sparse import triu
 import pickle
 from collections import defaultdict
-from tqdm import tqdm_notebook
+from tqdm import tqdm
 import sys
 
 from src.data_preparer import S_to_A, S_to_B, incidence_to_hyperedges
@@ -59,11 +59,11 @@ def hyper_katz(pairs, S_train, aggregator='min', alpha=0, beta=0.01, max_power=5
     I_m = eye(B.shape[0])
     print('Iterating over matrix powers...')
     scores = {'Avg': defaultdict(float)}
-    for k in tqdm_notebook(range(1, max_power + 1), 'Matrix power: '):
+    for k in tqdm(range(1, max_power + 1), 'Matrix power: '):
         K_alpha = (alpha * A) ** k
         K_beta = (beta * B) ** k
         S_beta = S_train * K_beta * S_train.T
-        for u, v in tqdm_notebook(pairs, 'Test pair: '):
+        for u, v in tqdm(pairs, 'Test pair: '):
             w = K_alpha[u, v] + S_beta[u, v]
             scores['Avg'][(u, v)] += w
     #     K_alpha = inv(I_n - alpha * A)
@@ -71,13 +71,13 @@ def hyper_katz(pairs, S_train, aggregator='min', alpha=0, beta=0.01, max_power=5
     #     K_beta = inv(I_m - beta * B)
     #     print(K_alpha.shape, K_beta.shape, S_train.shape)
     #     K = K_alpha + S_train*K_beta*S_train.T
-    #     scores = {'Avg': {(u, v): K[u, v] for u, v in tqdm_notebook(pairs, 'Test pair: ')}}
+    #     scores = {'Avg': {(u, v): K[u, v] for u, v in tqdm(pairs, 'Test pair: ')}}
     return scores
 
 
 def hyper_degree_product(pairs, S_train, aggregator='min'):
     scores = {'Avg': {}}
-    for u, v in tqdm_notebook(pairs, 'Test pair: '):
+    for u, v in tqdm(pairs, 'Test pair: '):
         hyn_u = incidence_to_hyperedges(S_train[:, S_train[u, :].nonzero()[1]])
         hyn_v = incidence_to_hyperedges(S_train[:, S_train[v, :].nonzero()[1]])
         scores['Avg'][(u, v)] = len(hyn_u) * len(hyn_v)
@@ -87,7 +87,7 @@ def hyper_degree_product(pairs, S_train, aggregator='min'):
 def hyper_product(pairs, S_train, aggregator='min'):
     #     aggregator = {'min': min, 'max': max, 'avg': get_avg}[aggregator]
     scores = {'Min': {}, 'Max': {}, 'Avg': {}, 'Sum': {}, 'L11': {}, 'L22': {}, 'L33': {}}
-    for u, v in tqdm_notebook(pairs, 'Test pair: '):
+    for u, v in tqdm(pairs, 'Test pair: '):
         hyn_u = incidence_to_hyperedges(S_train[:, S_train[u, :].nonzero()[1]])
         hyn_v = incidence_to_hyperedges(S_train[:, S_train[v, :].nonzero()[1]])
         hyper_scores = get_all_hp_scores(hyn_u, hyn_v)
@@ -107,7 +107,7 @@ def hyper_product(pairs, S_train, aggregator='min'):
 def hyper_pearson(pairs, S_train, aggregator='min'):
     #     aggregator = {'min': min, 'max': max, 'avg': get_avg}[aggregator]
     scores = {'Min': {}, 'Max': {}, 'Avg': {}, 'Sum': {}, 'L11': {}, 'L22': {}, 'L33': {}}
-    for u, v in tqdm_notebook(pairs, 'Test pair: '):
+    for u, v in tqdm(pairs, 'Test pair: '):
         hyn_u = incidence_to_hyperedges(S_train[:, S_train[u, :].nonzero()[1]])
         hyn_v = incidence_to_hyperedges(S_train[:, S_train[v, :].nonzero()[1]])
         hyper_scores = get_all_hpear_scores(hyn_u, hyn_v, S_train.shape[0])
@@ -126,7 +126,7 @@ def hyper_pearson(pairs, S_train, aggregator='min'):
 def hyper_common_neighbour(pairs, S_train, aggregator='min'):
     #     aggregator = {'min': min, 'max': max, 'avg': get_avg}[aggregator]
     scores = {'Min': {}, 'Max': {}, 'Avg': {}, 'Sum': {}, 'L11': {}, 'L22': {}, 'L33': {}}
-    for u, v in tqdm_notebook(pairs, 'Test pair: '):
+    for u, v in tqdm(pairs, 'Test pair: '):
         hyn_u = incidence_to_hyperedges(S_train[:, S_train[u, :].nonzero()[1]])
         hyn_v = incidence_to_hyperedges(S_train[:, S_train[v, :].nonzero()[1]])
         hyper_scores = get_all_hcn_scores(hyn_u, hyn_v)
@@ -145,7 +145,7 @@ def hyper_common_neighbour(pairs, S_train, aggregator='min'):
 def hyper_min_overlap(pairs, S_train, aggregator='min'):
     #     aggregator = {'min': min, 'max': max, 'avg': get_avg}[aggregator]
     scores = {'Min': {}, 'Max': {}, 'Avg': {}, 'Sum': {}, 'L11': {}, 'L22': {}, 'L33': {}}
-    for u, v in tqdm_notebook(pairs, 'Test pair: '):
+    for u, v in tqdm(pairs, 'Test pair: '):
         hyn_u = incidence_to_hyperedges(S_train[:, S_train[u, :].nonzero()[1]])
         hyn_v = incidence_to_hyperedges(S_train[:, S_train[v, :].nonzero()[1]])
         hyper_scores = get_all_mino_scores(hyn_u, hyn_v)
@@ -164,7 +164,7 @@ def hyper_min_overlap(pairs, S_train, aggregator='min'):
 def hyper_max_overlap(pairs, S_train, aggregator='min'):
     #     aggregator = {'min': min, 'max': max, 'avg': get_avg}[aggregator]
     scores = {'Min': {}, 'Max': {}, 'Avg': {}, 'Sum': {}, 'L11': {}, 'L22': {}, 'L33': {}}
-    for u, v in tqdm_notebook(pairs, 'Test pair: '):
+    for u, v in tqdm(pairs, 'Test pair: '):
         hyn_u = incidence_to_hyperedges(S_train[:, S_train[u, :].nonzero()[1]])
         hyn_v = incidence_to_hyperedges(S_train[:, S_train[v, :].nonzero()[1]])
         hyper_scores = get_all_maxo_scores(hyn_u, hyn_v)
@@ -183,7 +183,7 @@ def hyper_max_overlap(pairs, S_train, aggregator='min'):
 def hyper_jaccard(pairs, S_train, aggregator='min'):
     #     aggregator = {'min': min, 'max': max, 'avg': get_avg}[aggregator]
     scores = {'Min': {}, 'Max': {}, 'Avg': {}, 'Sum': {}, 'L11': {}, 'L22': {}, 'L33': {}}
-    for u, v in tqdm_notebook(pairs, 'Test pair: '):
+    for u, v in tqdm(pairs, 'Test pair: '):
         hyn_u = incidence_to_hyperedges(S_train[:, S_train[u, :].nonzero()[1]])
         hyn_v = incidence_to_hyperedges(S_train[:, S_train[v, :].nonzero()[1]])
         hyper_scores = get_all_jc_scores(hyn_u, hyn_v)
@@ -202,7 +202,7 @@ def hyper_jaccard(pairs, S_train, aggregator='min'):
 def hyper_association_strength(pairs, S_train, aggregator='min'):
     #     aggregator = {'min': min, 'max': max, 'avg': get_avg}[aggregator]
     scores = {'Min': {}, 'Max': {}, 'Avg': {}, 'Sum': {}, 'L11': {}, 'L22': {}, 'L33': {}}
-    for u, v in tqdm_notebook(pairs, 'Test pair: '):
+    for u, v in tqdm(pairs, 'Test pair: '):
         hyn_u = incidence_to_hyperedges(S_train[:, S_train[u, :].nonzero()[1]])
         hyn_v = incidence_to_hyperedges(S_train[:, S_train[v, :].nonzero()[1]])
         hyper_scores = get_all_as_scores(hyn_u, hyn_v)
@@ -221,7 +221,7 @@ def hyper_association_strength(pairs, S_train, aggregator='min'):
 def hyper_cosine(pairs, S_train, aggregator='min'):
     #     aggregator = {'min': min, 'max': max, 'avg': get_avg}[aggregator]
     scores = {'Min': {}, 'Max': {}, 'Avg': {}, 'Sum': {}, 'L11': {}, 'L22': {}, 'L33': {}}
-    for u, v in tqdm_notebook(pairs, 'Test pair: '):
+    for u, v in tqdm(pairs, 'Test pair: '):
         hyn_u = incidence_to_hyperedges(S_train[:, S_train[u, :].nonzero()[1]])
         hyn_v = incidence_to_hyperedges(S_train[:, S_train[v, :].nonzero()[1]])
         hyper_scores = get_all_cos_scores(hyn_u, hyn_v)
@@ -240,7 +240,7 @@ def hyper_cosine(pairs, S_train, aggregator='min'):
 def hyper_n_measure(pairs, S_train, aggregator='min'):
     #     aggregator = {'min': min, 'max': max, 'avg': get_avg}[aggregator]
     scores = {'Min': {}, 'Max': {}, 'Avg': {}, 'Sum': {}, 'L11': {}, 'L22': {}, 'L33': {}}
-    for u, v in tqdm_notebook(pairs, 'Test pair: '):
+    for u, v in tqdm(pairs, 'Test pair: '):
         hyn_u = incidence_to_hyperedges(S_train[:, S_train[u, :].nonzero()[1]])
         hyn_v = incidence_to_hyperedges(S_train[:, S_train[v, :].nonzero()[1]])
         hyper_scores = get_all_n_measure_scores(hyn_u, hyn_v)
@@ -399,7 +399,7 @@ def hyper_adamic_adar(pairs, S_train, aggregator='min'):
     #     aggregator = {'min': min, 'max': max, 'avg': get_avg}[aggregator]
     scores = {'Min': {}, 'Max': {}, 'Avg': {}, 'Sum': {}, 'L11': {}, 'L22': {}, 'L33': {}}
     hyd_array = S_train.sum(axis=1)
-    for u, v in tqdm_notebook(pairs, 'Test pair: '):
+    for u, v in tqdm(pairs, 'Test pair: '):
         hyn_u = incidence_to_hyperedges(S_train[:, S_train[u, :].nonzero()[1]])
         hyn_v = incidence_to_hyperedges(S_train[:, S_train[v, :].nonzero()[1]])
         hyper_scores = get_all_aa_scores(hyn_u, hyn_v, hyd_array)
@@ -641,7 +641,7 @@ def get_hypergraph_scores(lp_data, score_indices=None):
     I, J = triu(A_test_pos + A_test_neg).nonzero()
     test_pairs = list(zip(I, J))
     scores = {}
-    for i in tqdm_notebook(range(len(base_score_names)), 'Hypergraph score: '):
+    for i in tqdm(range(len(base_score_names)), 'Hypergraph score: '):
         # print(base_score_names)
         base_name = base_score_names[i]
         # print(base_name)
@@ -661,7 +661,7 @@ def store_hypergraph_scores(S_train, test_pairs, file_prefix, score_indices=None
     score_indices = score_indices or range(len(all_hypergraph_score_names))
     score_names = [all_hypergraph_score_names[i] for i in score_indices]
     base_score_names = list({n[:-3] for n in score_names})
-    for i in tqdm_notebook(range(len(base_score_names)), 'Hypergraph score: '):
+    for i in tqdm(range(len(base_score_names)), 'Hypergraph score: '):
         base_name = base_score_names[i]
         scoring_function = scoring_function_map[base_name]
         print('Calculating hypergraph scores: {}'.format(base_name))

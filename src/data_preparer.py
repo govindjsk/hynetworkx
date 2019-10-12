@@ -2,7 +2,7 @@ import random
 import numpy as np
 from scipy.sparse import csr_matrix, triu, hstack
 from collections import defaultdict
-from tqdm import tqdm_notebook
+from tqdm import tqdm
 import sys
 
 from src.utils import get_base_path
@@ -86,9 +86,9 @@ def S_to_A_timed(S,weighted, times ):
     node_hids_map = defaultdict(set)
     I, J = S.nonzero()
     iterator = list(zip(I, J))
-    for i, j in tqdm_notebook(iterator):
+    for i, j in tqdm(iterator):
         node_hids_map[i].add(j)
-    for u, v in tqdm_notebook(edges):
+    for u, v in tqdm(edges):
         #         S_u = set(S[u, :].nonzero()[1])
         #         S_v = set(S[v, :].nonzero()[1])
         S_u = node_hids_map[u]
@@ -170,7 +170,7 @@ def remove_singleton_columns(X):
 
 def get_neg_data_optimized(A):
     A_neg = csr_matrix((A.shape[0], 0))
-    for i in tqdm_notebook(range(A.shape[0])):
+    for i in tqdm(range(A.shape[0])):
         Ai = A[:, i]
         AAi = A * Ai
         AAi[AAi > 0] = 1
@@ -240,7 +240,7 @@ def get_neg_data(A, A_pos, factor=-1, mode='random'):
             A_neg = csr_matrix(A.shape, dtype=int)
             neg_pairs = set()
             #             V = list(range(n))
-            pbar = tqdm_notebook(total=desired_neg_count)
+            pbar = tqdm(total=desired_neg_count)
             I, J = [], []
             while neg_count < desired_neg_count:
                 u, v = get_random_pair(n)
@@ -284,7 +284,7 @@ def incidence_to_hyperedges(S, silent_mode=True):
     I, J = S.nonzero()
     hyperedges = defaultdict(set)
     indices = list(zip(I, J))
-    for i, j in (tqdm_notebook(indices) if not silent_mode else indices):
+    for i, j in (tqdm(indices) if not silent_mode else indices):
         hyperedges[j].add(i)
     hyperedges = set(map(frozenset, hyperedges.values()))
     return hyperedges
@@ -306,7 +306,7 @@ def clean_train_hypergraph(S, A_test_pos):
     I, J = triu(A_test_pos).nonzero()
     indices = list(zip(I, J))
     S_hyperedges = incidence_to_hyperedges(S, silent_mode=False)
-    for i, j in tqdm_notebook(indices):
+    for i, j in tqdm(indices):
         row_i = S[i, :]
         row_j = S[j, :]
         common_hyp_ids = row_i.multiply(row_j).nonzero()[1]

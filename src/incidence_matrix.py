@@ -1,7 +1,7 @@
 import os
 
 from collections import defaultdict
-from tqdm import tqdm, tqdm_notebook
+from tqdm import tqdm
 import numpy as np
 from src.adjacency_matrix import AdjacencyMatrix
 from .utils import print_matrix, _or, get_printable_matrix, get_base_path
@@ -93,23 +93,23 @@ def parse_benson_incidence_matrix(name, base_path=None, ignore_time=True):
     simplices_path = os.path.join(path, name + '-simplices.txt')
     times_path = os.path.join(path, name + '-times.txt')
     print('Reading nverts...')
-    nverts = [int(l.rstrip('\n')) for l in tqdm_notebook(open(nverts_path, 'r'))]
+    nverts = [int(l.rstrip('\n')) for l in tqdm(open(nverts_path, 'r'))]
     # TODO: Remember that we are reindexing vertices to 0-index.
     #  This has to be followed while initializing labels as well.
     print('Reading simplices...')
-    simplices = [int(l.rstrip('\n')) - 1 for l in tqdm_notebook(open(simplices_path, 'r'))]
+    simplices = [int(l.rstrip('\n')) - 1 for l in tqdm(open(simplices_path, 'r'))]
     labels_path = os.path.join(path, name + '-node-labels.txt')
     vertices = list(sorted(set(simplices)))
     try:
         print('Reading labels...')
-        labels = [l.rstrip('\n') for l in tqdm_notebook(open(labels_path, 'r'))]
+        labels = [l.rstrip('\n') for l in tqdm(open(labels_path, 'r'))]
         labels = [' '.join(l.split(' ')[1:]) for l in labels]
     except FileNotFoundError:
         print('No labels found.')
         labels = ['vertex_{}'.format(v) for v in vertices]
     if not ignore_time:
         print('Reading times...')
-        times = [float(l.rstrip('\n')) for l in tqdm_notebook(open(times_path, 'r'))]
+        times = [float(l.rstrip('\n')) for l in tqdm(open(times_path, 'r'))]
     else:
         times = [0] * len(nverts)
         print('WARNING: Time information is defaulted to all zeros (0)')
@@ -123,7 +123,7 @@ def parse_benson_incidence_matrix(name, base_path=None, ignore_time=True):
     print('Parsing simplices...')
     i = 0
     iterator = list(zip(nverts, times))
-    for nv, time in tqdm_notebook(iterator):
+    for nv, time in tqdm(iterator):
         hyperedge = frozenset(simplices[i: i + nv])
         hyperedge_times_map[hyperedge].add(time)
         if hyperedge not in hyperedges:
@@ -139,10 +139,10 @@ def parse_benson_incidence_matrix(name, base_path=None, ignore_time=True):
     print('Creating sparse matrix...')
     print(len(rows), len(cols), n, m)
     matrix = csr_matrix(([1] * len(rows), (rows, cols)), shape=(n, m))
-    vertex_list = [Vertex(i, labels[i]) for i in tqdm_notebook(range(len(labels)))]
+    vertex_list = [Vertex(i, labels[i]) for i in tqdm(range(len(labels)))]
 
     print('Recalculating hyperedge times...')
-    hyperedge_times = [min(hyperedge_times_map[hyperedge_list[j]]) for j in tqdm_notebook(range(matrix.shape[1]))]
+    hyperedge_times = [min(hyperedge_times_map[hyperedge_list[j]]) for j in tqdm(range(matrix.shape[1]))]
     id_label_map = {v.id: v.label for v in vertex_list}
     return matrix, np.array(hyperedge_times), id_label_map
 

@@ -3,7 +3,7 @@ from collections import Counter
 from joblib import Memory
 import os
 import pandas as pd
-from tqdm import tqdm_notebook
+from tqdm import tqdm
 from scipy.sparse import csr_matrix, triu
 import random
 
@@ -116,7 +116,7 @@ def get_incidence_matrix(am_df, mn_map=None):
     J = []
     m = len(hyperedges)
     F_labels = {}
-    for j, he in tqdm_notebook(enumerate(hyperedges)):
+    for j, he in tqdm(enumerate(hyperedges)):
         label = hyperedge_labels[he]
         F_labels[j] = label
         he = list(he)

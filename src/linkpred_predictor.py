@@ -11,7 +11,7 @@ import pandas as pd
 from scipy.sparse import triu
 import networkx as nx
 import pickle
-from tqdm import tqdm_notebook
+from tqdm import tqdm
 
 base_path = '/content/gdrive/My Drive/Colab Notebooks/data/'
 
@@ -71,7 +71,7 @@ def get_linkpred_scores(lp_data, weighted, predictor_indices=None):
     test_pairs = list(zip(*triu(A_test_pos + A_test_neg).nonzero()))
     scores = {}
     if weighted:
-        for i in tqdm_notebook(range(len(predictors)), 'Predictor: '):
+        for i in tqdm(range(len(predictors)), 'Predictor: '):
             predictor = predictors[i]
             abbr = predictor_abbr_map[predictor_names[i]]
             print('Preparing predictor {}'.format(abbr))
@@ -86,7 +86,7 @@ def get_linkpred_scores(lp_data, weighted, predictor_indices=None):
             scores[abbr] = {k: results[k] for k in test_pairs}
         scores_df = pd.DataFrame(scores)
     else:
-        for i in tqdm_notebook(range(len(predictors)), 'Predictor: '):
+        for i in tqdm(range(len(predictors)), 'Predictor: '):
             predictor = predictors[i]
             abbr = predictor_abbr_map[predictor_names[i]]
             print('Preparing predictor {}'.format(abbr))
@@ -103,7 +103,7 @@ def store_linkpred_scores(G_train, test_pairs, file_prefix, predictor_indices=No
     predictor_indices = predictor_indices or range(len(all_predictors))
     predictors = [all_predictors[i] for i in predictor_indices]
     predictor_names = [all_predictor_names[i] for i in predictor_indices]
-    for i in tqdm_notebook(range(len(predictors)), 'Predictor: '):
+    for i in tqdm(range(len(predictors)), 'Predictor: '):
         predictor = predictors[i]
         abbr = predictor_abbr_map[predictor_names[i]]
         print('Preparing predictor {}'.format(abbr))
