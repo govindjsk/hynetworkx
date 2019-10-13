@@ -103,8 +103,10 @@ def S_to_A_timed(S, weighted, times):
     node_hids_map = defaultdict(set)
     I, J = S.nonzero()
     iterator = list(zip(I, J))
+    print('Precomputing node-hyperneighbor map...')
     for i, j in tqdm(iterator):
         node_hids_map[i].add(j)
+    print('Resolving times for all edges...')
     for u, v in tqdm(edges):
         #         S_u = set(S[u, :].nonzero()[1])
         #         S_v = set(S[v, :].nonzero()[1])
@@ -186,6 +188,7 @@ def remove_singleton_columns(X):
 
 def get_neg_data_optimized(A):
     A_neg = csr_matrix((A.shape[0], 0))
+    print('Iterating over each row of adjacency matrix...')
     for i in tqdm(range(A.shape[0])):
         Ai = A[:, i]
         AAi = A * Ai
@@ -256,6 +259,7 @@ def get_neg_data(A, A_pos, factor=-1, mode='random'):
             A_neg = csr_matrix(A.shape, dtype=int)
             neg_pairs = set()
             #             V = list(range(n))
+            print('Generating negative patterns until {} are found'.format(desired_neg_count))
             pbar = tqdm(total=desired_neg_count)
             I, J = [], []
             while neg_count < desired_neg_count:
@@ -322,6 +326,7 @@ def clean_train_hypergraph(S, A_test_pos):
     I, J = triu(A_test_pos).nonzero()
     indices = list(zip(I, J))
     S_hyperedges = incidence_to_hyperedges(S, silent_mode=False)
+    print('Splitting hyperedges and getting S_train...')
     for i, j in tqdm(indices):
         row_i = S[i, :]
         row_j = S[j, :]
