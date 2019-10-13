@@ -1,6 +1,6 @@
 import random
 import numpy as np
-from scipy.sparse import csr_matrix, triu, hstack
+from scipy.sparse import csr_matrix, triu, hstack, find
 from collections import defaultdict
 from tqdm import tqdm
 import sys
@@ -74,7 +74,7 @@ def prepare_lp_data(S, weighted, times, rho, neg_ratio=-1, mode='random'):
 def prepare_structural_lp_data(S, weighted, rho, neg_ratio=-1, mode='random'):
     A = S_to_A(S, weighted, silent=False)
     print('Splitting into train/test...')
-    A_train, A_test, A_test_pos = split_train_test(A, weighted, rho)
+    A_train, A_test, A_test_pos = split_train_test(A, rho)
     A_test_neg = get_neg_data(A, A_test_pos, neg_ratio, mode)
     S_train = clean_train_hypergraph(S, A_test_pos)
     lp_data = {'S_train': S_train, 'A_train': A_train, 'A_test': A_test,
@@ -130,26 +130,28 @@ def S_to_A_timed(S, weighted, times):
     return A, edge_time_map
 
 
-def split_train_test(A, weighted, rho):
-    I, J = triu(A).nonzero()
-    edges = set(zip(I, J))
+def split_train_test(A, rho):
+    I, J, V = find(triu(A))
+    edges = set(zip(I, J, V))
     print('STEP 1: Sampling test edges...')
     test_edges = list(random.sample(edges, int(rho * len(edges))))
-    test_I, test_J = list(zip(*test_edges))
+    test_I, test_J, test_V = list(zip(*test_edges))
 
     print('STEP 2: Preparing test data...')
-    test_V = ([1] * len(test_I + test_J)) if not weighted else \
-        ([A[i, j] for i, j in test_edges] + [A[j, i] for i, j in test_edges])
+    # test_V = ([1] * len(test_I + test_J)) if not weighted else \
+    #     ([A[i, j] for i, j in test_edges] + [A[j, i] for i, j in test_edges])
     print('Filling in A_test...')
-    A_test = csr_matrix((test_V, (test_I + test_J, test_J + test_I)), shape=A.shape)
+    A_test = csr_matrix((test_V, (test_I + test_J)), shape=A.shape)
+    A_test = A_test + A_test.T
 
     print('STEP 3: Preparing train data...')
     train_edges = list(edges.difference(set(test_edges)))
-    train_I, train_J = list(zip(*train_edges))
-    train_V = ([1] * len(train_I + train_J)) if not weighted else \
-        ([A[i, j] for i, j in train_edges] + [A[j, i] for i, j in train_edges])
+    train_I, train_J, train_V = list(zip(*train_edges))
+    # train_V = ([1] * len(train_I + train_J)) if not weighted else \
+    #     ([A[i, j] for i, j in train_edges] + [A[j, i] for i, j in train_edges])
     print('Filling in A_train...')
-    A_train = csr_matrix((train_V, (train_I + train_J, train_J + train_I)), shape=A.shape)
+    A_train = csr_matrix((train_V, (train_I + train_J)), shape=A.shape)
+    A_train = A_train + A_train.T
     A_test_pos = A_test
     return A_train, A_test, A_test_pos
 
