@@ -141,10 +141,11 @@ def parse_benson_incidence_matrix(name,
     print('Creating sparse matrix...')
     print(len(rows), len(cols), n, m)
     S = csr_matrix(([1] * len(rows), (rows, cols)), shape=(n, m))
+    print('Preparing vertex list...')
     vertex_list = [Vertex(i, labels[i]) for i in tqdm(range(len(labels)))]
 
     print('Recalculating hyperedge times...')
-    times = np.array([min(hyperedge_times_map[hyperedge_list[j]]) for j in tqdm(range(matrix.shape[1]))])
+    times = np.array([min(hyperedge_times_map[hyperedge_list[j]]) for j in tqdm(range(S.shape[1]))])
 
     id_label_map = {v.id: v.label for v in vertex_list}
     if split_mode == 'structural':
