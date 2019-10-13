@@ -106,16 +106,16 @@ def parse_benson_incidence_matrix(name,
     simplices = [int(l.rstrip('\n')) - 1 for l in tqdm(open(simplices_path, 'r'))]
     labels_path = os.path.join(path, name + '-node-labels.txt')
     vertices = list(sorted(set(simplices)))
+    n = max(vertices) + 1
     try:
         print('Reading labels...')
         labels = [l.rstrip('\n') for l in tqdm(open(labels_path, 'r'))]
         labels = [' '.join(l.split(' ')[1:]) for l in labels]
     except FileNotFoundError:
         print('No labels found.')
-        labels = ['vertex_{}'.format(v) for v in vertices]
+        labels = ['vertex_{}'.format(i) for i in range(n)]
     print('Reading times...')
     times = [float(l.rstrip('\n')) for l in tqdm(open(times_path, 'r'))]
-    n = max(vertices) + 1
     hyperedges = set()
     hyperedge_times_map = defaultdict(set)
     hyperedge_list = []
@@ -142,7 +142,7 @@ def parse_benson_incidence_matrix(name,
     print(len(rows), len(cols), n, m)
     S = csr_matrix(([1] * len(rows), (rows, cols)), shape=(n, m))
     print('Preparing vertex list...')
-    vertex_list = [Vertex(i, labels[i]) for i in tqdm(range(len(labels)))]
+    vertex_list = [Vertex(i, labels[i]) for i in tqdm(range(n))]
 
     print('Recalculating hyperedge times...')
     times = np.array([min(hyperedge_times_map[hyperedge_list[j]]) for j in tqdm(range(S.shape[1]))])
