@@ -353,11 +353,12 @@ def clean_train_hypergraph(S, A_test_pos):
             S_hyperedges.remove(f)
             S_hyperedges.add(f_i)
             S_hyperedges.add(f_j)
-            node_hnbrs_map[i].remove(f)
-            node_hnbrs_map[j].remove(f)
-            node_hnbrs_map[i].add(f_j)
-            node_hnbrs_map[j].add(f_i)
-
+            for k in f:
+                node_hnbrs_map[k].remove(f)
+                node_hnbrs_map[k].add(f_i)
+                node_hnbrs_map[k].add(f_j)
+            node_hnbrs_map[i].remove(f_i)
+            node_hnbrs_map[j].remove(f_j)
         # T = S[:, common_hyp_ids]
         # U = T.copy()
         # T[i, :] = 0
