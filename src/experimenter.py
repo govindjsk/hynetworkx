@@ -4,6 +4,8 @@ import os
 from collections import defaultdict
 from pprint import pprint
 
+from tqdm import tqdm
+
 sys.path.append('../')
 from src.utils import get_data_abbr, mkdir_p, get_base_path, get_library_path
 import pandas as pd
@@ -13,7 +15,6 @@ import numpy as np
 library_path = get_library_path()
 sys.path.append(library_path)
 sys.path.append(os.path.join(library_path, "hynetworkx"))
-
 
 from src.data_preparer import filter_size, prepare_lp_data, get_time_filter_params
 from src.hypergraph_link_predictor import get_hypergraph_scores, hypergraph_score_abbr_map, all_hypergraph_score_names
@@ -74,7 +75,6 @@ hyg_abbr_pred_map = {a: p for p, a in hypergraph_score_abbr_map.items()}
 default_hyg_names = [hyg_abbr_pred_map[a] for a in default_hyper_cols]
 default_hyper_indices = [all_hypergraph_score_names.index(p) for p in default_hyg_names]
 
-
 combined_tables = {}
 mixed_combinations_map = {'AA': ['AA', 'HAAM', 'HAAa', 'HAAl1', 'HAAl2'],
                           'AS': ['AS', 'HASM', 'HASa', 'HASl1', 'HASl2'],
@@ -90,11 +90,11 @@ mixed_combinations_map = {'AA': ['AA', 'HAAM', 'HAAa', 'HAAl1', 'HAAl2'],
 
 
 @memory.cache
-def perform_classification(data_params, lp_data_params, lp_params, classifier_params, random_state=42, iter_var=0):
+def perform_classification(data_params, lp_data_params, lp_params, classifier_params, iter_var=0):
     _, lp_results = perform_link_prediction(data_params, lp_data_params, lp_params, iter_var)
     features, classifier = [classifier_params[x] for x in ['features', 'classifier']]
-    perf_df, feat_imp_df, classifier_scores_df = classify(lp_results, features, classifier, random_state, iter_var)
-    return perf_df, feat_imp_df, classifier_scores_df
+    classifier_output = classify(lp_results, features, classifier, iter_var)
+    return classifier_output
 
 
 def populate_and_store_classifier_tables(data_names, split_modes, feature_combinations_map, metrics, classifier, path,
@@ -137,8 +137,6 @@ def populate_and_store_classifier_tables(data_names, split_modes, feature_combin
             df.to_latex(open(file_path, 'w'), bold_rows=True, escape=False)
             # print(df.to_latex(bold_rows=True, escape=False))
     return updated_tables
-
-
 
 
 @memory.cache
@@ -314,13 +312,42 @@ def parse_params():
     return params
 
 
-def main():
+def perform_GWH_classification(params, G_feats, W_feats, H_feats, classifier):
+    feat_combs = [G_feats, W_feats, H_feats, G_feats + H_feats, W_feats + H_feats]
+    params['classifier_params'] = {'classifier': classifier}
+    print('Iterating over feature combinations...')
+    for comb in tqdm(feat_combs):
+        params['classifier_params']['features'] = comb
+        _ = perform_classification(params['data_params'],
+                                   params['lp_data_params'],
+                                   params['lp_params'],
+                                   params['classifier_params'],
+                                   params['iter_var'])
+
+
+def main(mode='plp'):
     params = parse_params()
     pprint(params)
-    _, lp_results = perform_link_prediction(params['data_params'],
-                                            params['lp_data_params'],
-                                            params['lp_params'],
-                                            params['iter_var'])
+    if mode == 'plp':
+        _, lp_results = perform_link_prediction(params['data_params'],
+                                                params['lp_data_params'],
+                                                params['lp_params'],
+                                                params['iter_var'])
+    elif mode == 'pc':
+        mcm = mixed_combinations_map
+        # For individual 10 lp algorithms scores:
+        print('For each LP col, finding GWH scores...')
+        for lp_col in tqdm(default_lp_cols):
+            G_feats = [lp_col]
+            W_feats = ['w_{}'.format(lp_col)]
+            H_feats = mcm[lp_col][1:]
+            perform_GWH_classification(params, G_feats, W_feats, H_feats, 'xgboost')
+        # For all scores at once:
+        print('Finding GWH scores for all scores at once...')
+        G_feats = default_lp_cols
+        W_feats = ['w_{}'.format(c) for c in default_lp_cols]
+        H_feats = default_hyper_cols
+        perform_GWH_classification(params, G_feats, W_feats, H_feats, 'xgboost')
 
 
 if __name__ == '__main__':
