@@ -338,6 +338,17 @@ def hyperedges_to_incidence(hyperedges, nV):
     return S
 
 
+def prepare_node_hyperneighbors_map(S):
+    S_hyperedges = incidence_to_hyperedges(S, silent_mode=False)
+
+    node_hnbrs_map = defaultdict(set)
+    print('Precomputing node-hyperneighbor map...')
+    for f in tqdm(S_hyperedges):
+        for v in f:
+            node_hnbrs_map[v].add(f)
+    return node_hnbrs_map
+
+
 def clean_train_hypergraph(S, A_test_pos):
     I, J = triu(A_test_pos).nonzero()
     indices = list(zip(I, J))
