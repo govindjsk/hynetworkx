@@ -304,6 +304,8 @@ def incidence_to_hyperedges(S, silent_mode=True):
     I, J = S.nonzero()
     hyperedges = defaultdict(set)
     indices = list(zip(I, J))
+    if not silent_mode:
+        print('Converting incidence matrix to hyperedge set for faster processing...')
     for i, j in (tqdm(indices) if not silent_mode else indices):
         hyperedges[j].add(i)
     hyperedges = set(map(frozenset, hyperedges.values()))
