@@ -328,11 +328,20 @@ def clean_train_hypergraph(S, A_test_pos):
     I, J = triu(A_test_pos).nonzero()
     indices = list(zip(I, J))
     S_hyperedges = incidence_to_hyperedges(S, silent_mode=False)
+    node_hids_map = defaultdict(set)
+    I, J = S.nonzero()
+    iterator = list(zip(I, J))
+    print('Precomputing node-hyperneighbor map...')
+    for i, j in tqdm(iterator):
+        node_hids_map[i].add(j)
     print('Splitting hyperedges and getting S_train...')
     for i, j in tqdm(indices):
-        row_i = S[i, :]
-        row_j = S[j, :]
-        common_hyp_ids = row_i.multiply(row_j).nonzero()[1]
+        # row_i = S[i, :]
+        # row_j = S[j, :]
+        i_hnbrs = node_hids_map[i]
+        j_hnbrs = node_hids_map[j]
+        common_hyp_ids = i_hnbrs.intersection(j_hnbrs)
+        # common_hyp_ids = row_i.multiply(row_j).nonzero()[1]
         T = S[:, common_hyp_ids]
         U = T.copy()
         T[i, :] = 0
