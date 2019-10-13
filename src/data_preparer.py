@@ -300,7 +300,7 @@ def get_neg_data(A, A_pos, factor=-1, mode='random'):
 #             A_neg = csr_matrix(([1]*len(I+J), (I+J, J+I)), shape=A_neg.shape)
 #     return A_neg
 
-def incidence_to_hyperedges(S, silent_mode=True):
+def incidence_to_hyperedges(S, silent_mode=True, _type=set):
     I, J = S.nonzero()
     hyperedges = defaultdict(set)
     indices = list(zip(I, J))
@@ -308,7 +308,12 @@ def incidence_to_hyperedges(S, silent_mode=True):
         print('Converting incidence matrix to hyperedge set for faster processing...')
     for i, j in (tqdm(indices) if not silent_mode else indices):
         hyperedges[j].add(i)
-    hyperedges = set(map(frozenset, hyperedges.values()))
+    if _type == set:
+        return set(map(frozenset, hyperedges.values()))
+    elif _type == list:
+        return set(map(frozenset, hyperedges.values()))
+    elif _type == dict:
+        return {i: frozenset(f) for i, f in hyperedges.items()}
     return hyperedges
 
 
@@ -334,6 +339,7 @@ def clean_train_hypergraph(S, A_test_pos):
     print('Precomputing node-hyperneighbor map...')
     for i, j in tqdm(iterator):
         node_hids_map[i].add(j)
+    hid_hyperedge_map = incidence_to_hyperedges(S, silent_mode=False, _type=dict)
     print('Splitting hyperedges and getting S_train...')
     for i, j in tqdm(indices):
         # row_i = S[i, :]
@@ -341,19 +347,29 @@ def clean_train_hypergraph(S, A_test_pos):
         i_hnbrs = node_hids_map[i]
         j_hnbrs = node_hids_map[j]
         common_hyp_ids = i_hnbrs.intersection(j_hnbrs)
+        common_hyperedges = {hid_hyperedge_map[hid] for hid in common_hyp_ids}
         # common_hyp_ids = row_i.multiply(row_j).nonzero()[1]
-        T = S[:, common_hyp_ids]
-        U = T.copy()
-        T[i, :] = 0
-        U[j, :] = 0
-        # TODO: check for repeated columns in S
-        V = hstack([T, U]).tocsr().astype(dtype=int)
-        V = remove_singleton_columns(V)
-        S = dropcols_fancy(S, common_hyp_ids)
-        V_hyperedges = incidence_to_hyperedges(V)
-        new_hyperedges = V_hyperedges.difference(S_hyperedges)
-        V_new = hyperedges_to_incidence(new_hyperedges, V.shape[0])
-        S = hstack([S, V_new]).tocsr().astype(dtype=int)
+        new_hyperedges = {}
+        for f in common_hyperedges:
+            S_hyperedges.remove(f)
+            f_i = frozenset(f.difference({i}))
+            f_j = frozenset(f.difference({j}))
+            S_hyperedges.add(f_i)
+            S_hyperedges.add(f_j)
+
+        # T = S[:, common_hyp_ids]
+        # U = T.copy()
+        # T[i, :] = 0
+        # U[j, :] = 0
+        # # TODO: check for repeated columns in S
+        # V = hstack([T, U]).tocsr().astype(dtype=int)
+        # V = remove_singleton_columns(V)
+        # S = dropcols_fancy(S, common_hyp_ids)
+        # V_hyperedges = incidence_to_hyperedges(V)
+        # new_hyperedges = V_hyperedges.difference(S_hyperedges)
+        # V_new = hyperedges_to_incidence(new_hyperedges, V.shape[0])
+        # S = hstack([S, V_new]).tocsr().astype(dtype=int)
+    S = hyperedges_to_incidence(S_hyperedges)
     return S
 
 
