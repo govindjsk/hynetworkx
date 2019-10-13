@@ -9,7 +9,7 @@ from src.utils import get_base_path
 
 base_path = get_base_path()
 default_time_filter_params = (None, None)
-data_time_filter_params_map = {'coauth-DBLP': (1980, 1982),
+data_time_filter_params_map = {'coauth-DBLP': (2007, 2017),
                                'threads-math-sx': (206041827210, None),  # Took last 100000 posts
                                'tags-math-sx': (217219821220, None),  # Took last 100000 posts
                                }
@@ -140,6 +140,7 @@ def split_train_test(A, weighted, rho):
     print('STEP 2: Preparing test data...')
     test_V = ([1] * len(test_I + test_J)) if not weighted else \
         ([A[i, j] for i, j in test_edges] + [A[j, i] for i, j in test_edges])
+    print('Filling in A_test...')
     A_test = csr_matrix((test_V, (test_I + test_J, test_J + test_I)), shape=A.shape)
 
     print('STEP 3: Preparing train data...')
@@ -147,6 +148,7 @@ def split_train_test(A, weighted, rho):
     train_I, train_J = list(zip(*train_edges))
     train_V = ([1] * len(train_I + train_J)) if not weighted else \
         ([A[i, j] for i, j in train_edges] + [A[j, i] for i, j in train_edges])
+    print('Filling in A_train...')
     A_train = csr_matrix((train_V, (train_I + train_J, train_J + train_I)), shape=A.shape)
     A_test_pos = A_test
     return A_train, A_test, A_test_pos
