@@ -15,7 +15,7 @@ sys.path.append(library_path)
 sys.path.append(os.path.join(library_path, "hynetworkx"))
 
 
-from src.data_preparer import filter_size, prepare_lp_data
+from src.data_preparer import filter_size, prepare_lp_data, get_time_filter_params
 from src.hypergraph_link_predictor import get_hypergraph_scores, hypergraph_score_abbr_map, all_hypergraph_score_names
 from src.link_predictor import get_perf_df
 from src.linkpred_predictor import get_linkpred_scores, predictor_abbr_map, all_predictor_names
@@ -139,6 +139,8 @@ def populate_and_store_classifier_tables(data_names, split_modes, feature_combin
     return updated_tables
 
 
+
+
 @memory.cache
 def perform_link_prediction(data_params, lp_data_params, lp_params=None, iter_var=0):
     """
@@ -156,11 +158,11 @@ def perform_link_prediction(data_params, lp_data_params, lp_params=None, iter_va
     rho, neg_factor, neg_mode = [lp_data_params[x] for x in
                                  ['rho', 'neg_factor', 'neg_mode']]
 
-    S, times, id_label_map = parse_S(data_name, base_path=base_path,
-                                     ignore_time=(split_mode == 'structural'))
-
-    if split_mode == 'structural':
-        S, times = filter_size(S, times, 2, max_size_limit)
+    S, times, id_label_map = parse_S(data_name,
+                                     base_path,
+                                     split_mode,
+                                     max_size_limit,
+                                     *get_time_filter_params(data_name))
 
     weighted_lp_data = prepare_lp_data(S, True, times, rho, neg_factor, neg_mode)
 

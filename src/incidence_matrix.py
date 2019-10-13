@@ -4,6 +4,7 @@ from collections import defaultdict
 from tqdm import tqdm
 import numpy as np
 from src.adjacency_matrix import AdjacencyMatrix
+from src.data_preparer import filter_size, filter_time
 from .utils import print_matrix, _or, get_printable_matrix, get_base_path
 from .vertex import Vertex
 from scipy.sparse import csr_matrix
@@ -86,7 +87,12 @@ def get_benson_incidence_matrix(name, base_path=None, ignore_time=True, force_pa
     return S
 
 @memory.cache
-def parse_benson_incidence_matrix(name, base_path=None, ignore_time=True):
+def parse_benson_incidence_matrix(name,
+                                  base_path=None,
+                                  split_mode=None,
+                                  max_size_limit=None,
+                                  st_time=None,
+                                  en_time=None):
     base_path = base_path or DATA_DEFAULTS['base_path_benson']
     path = os.path.join(base_path, name)
     nverts_path = os.path.join(path, name + '-nverts.txt')
@@ -107,10 +113,10 @@ def parse_benson_incidence_matrix(name, base_path=None, ignore_time=True):
     except FileNotFoundError:
         print('No labels found.')
         labels = ['vertex_{}'.format(v) for v in vertices]
-    if not ignore_time:
+    if split_mode == 'temporal':
         print('Reading times...')
         times = [float(l.rstrip('\n')) for l in tqdm(open(times_path, 'r'))]
-    else:
+    elif split_mode == 'structural':
         times = [0] * len(nverts)
         print('WARNING: Time information is defaulted to all zeros (0)')
     n = max(vertices) + 1
@@ -138,13 +144,19 @@ def parse_benson_incidence_matrix(name, base_path=None, ignore_time=True):
     m = len(hyperedges)
     print('Creating sparse matrix...')
     print(len(rows), len(cols), n, m)
-    matrix = csr_matrix(([1] * len(rows), (rows, cols)), shape=(n, m))
+    S = csr_matrix(([1] * len(rows), (rows, cols)), shape=(n, m))
     vertex_list = [Vertex(i, labels[i]) for i in tqdm(range(len(labels)))]
 
     print('Recalculating hyperedge times...')
-    hyperedge_times = [min(hyperedge_times_map[hyperedge_list[j]]) for j in tqdm(range(matrix.shape[1]))]
+    times = np.array([min(hyperedge_times_map[hyperedge_list[j]]) for j in tqdm(range(matrix.shape[1]))])
+
     id_label_map = {v.id: v.label for v in vertex_list}
-    return matrix, np.array(hyperedge_times), id_label_map
+    if split_mode == 'structural':
+        min_size_limit = 2
+        print('Filtering size for [{}, {}]'.format(min_size_limit, max_size_limit))
+        S, times = filter_size(S, times, min_size_limit, max_size_limit)
+    S, times, id_label_map = filter_time(S, times, id_label_map, st_time or -1, en_time or -1)
+    return S, times, id_label_map
 
 
 def main():
