@@ -9,7 +9,7 @@ from src.utils import get_base_path
 
 base_path = get_base_path()
 default_time_filter_params = (None, None)
-data_time_filter_params_map = {'coauth-DBLP': (2016, 2017),
+data_time_filter_params_map = {'coauth-DBLP': (1980, 1982),
                                'threads-math-sx': (206041827210, None),  # Took last 100000 posts
                                'tags-math-sx': (217219821220, None),  # Took last 100000 posts
                                }
@@ -371,7 +371,7 @@ def clean_train_hypergraph(S, A_test_pos):
         # new_hyperedges = V_hyperedges.difference(S_hyperedges)
         # V_new = hyperedges_to_incidence(new_hyperedges, V.shape[0])
         # S = hstack([S, V_new]).tocsr().astype(dtype=int)
-    S = hyperedges_to_incidence(S_hyperedges)
+    S = hyperedges_to_incidence(S_hyperedges, S.shape[0])
     return S
 
 
