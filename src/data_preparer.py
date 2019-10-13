@@ -9,7 +9,7 @@ from src.utils import get_base_path
 
 base_path = get_base_path()
 default_time_filter_params = (None, None)
-data_time_filter_params_map = {'coauth-DBLP': (2007, 2017),
+data_time_filter_params_map = {'coauth-DBLP': (2016, 2017),
                                'threads-math-sx': (206041827210, None),  # Took last 100000 posts
                                'tags-math-sx': (217219821220, None),  # Took last 100000 posts
                                }
