@@ -305,7 +305,7 @@ def incidence_to_hyperedges(S, silent_mode=True, _type=set):
     hyperedges = defaultdict(set)
     indices = list(zip(I, J))
     if not silent_mode:
-        print('Converting incidence matrix to hyperedge set for faster processing...')
+        print('Converting incidence matrix to hyperedge {} for faster processing...'.format(_type))
     for i, j in (tqdm(indices) if not silent_mode else indices):
         hyperedges[j].add(i)
     if _type == set:
@@ -333,29 +333,30 @@ def clean_train_hypergraph(S, A_test_pos):
     I, J = triu(A_test_pos).nonzero()
     indices = list(zip(I, J))
     S_hyperedges = incidence_to_hyperedges(S, silent_mode=False)
-    node_hids_map = defaultdict(set)
-    I, J = S.nonzero()
-    iterator = list(zip(I, J))
+
+    node_hnbrs_map = defaultdict(set)
     print('Precomputing node-hyperneighbor map...')
-    for i, j in tqdm(iterator):
-        node_hids_map[i].add(j)
-    hid_hyperedge_map = incidence_to_hyperedges(S, silent_mode=False, _type=dict)
+    for f in tqdm(S_hyperedges):
+        for v in f:
+            node_hnbrs_map[v].add(f)
+
     print('Splitting hyperedges and getting S_train...')
     for i, j in tqdm(indices):
-        # row_i = S[i, :]
-        # row_j = S[j, :]
-        i_hnbrs = node_hids_map[i]
-        j_hnbrs = node_hids_map[j]
-        common_hyp_ids = i_hnbrs.intersection(j_hnbrs)
-        common_hyperedges = {hid_hyperedge_map[hid] for hid in common_hyp_ids}
-        # common_hyp_ids = row_i.multiply(row_j).nonzero()[1]
-        new_hyperedges = {}
+        i_hnbrs = node_hnbrs_map[i]
+        j_hnbrs = node_hnbrs_map[j]
+        common_hyperedges = i_hnbrs.intersection(j_hnbrs)
+        if len(common_hyperedges) == 0:
+            continue
         for f in common_hyperedges:
-            S_hyperedges.remove(f)
             f_i = frozenset(f.difference({i}))
             f_j = frozenset(f.difference({j}))
+            S_hyperedges.remove(f)
             S_hyperedges.add(f_i)
             S_hyperedges.add(f_j)
+            node_hnbrs_map[i].remove(f)
+            node_hnbrs_map[j].remove(f)
+            node_hnbrs_map[i].add(f_j)
+            node_hnbrs_map[j].add(f_i)
 
         # T = S[:, common_hyp_ids]
         # U = T.copy()
