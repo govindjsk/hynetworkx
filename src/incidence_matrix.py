@@ -113,12 +113,8 @@ def parse_benson_incidence_matrix(name,
     except FileNotFoundError:
         print('No labels found.')
         labels = ['vertex_{}'.format(v) for v in vertices]
-    if split_mode == 'temporal':
-        print('Reading times...')
-        times = [float(l.rstrip('\n')) for l in tqdm(open(times_path, 'r'))]
-    elif split_mode == 'structural':
-        times = [0] * len(nverts)
-        print('WARNING: Time information is defaulted to all zeros (0)')
+    print('Reading times...')
+    times = [float(l.rstrip('\n')) for l in tqdm(open(times_path, 'r'))]
     n = max(vertices) + 1
     hyperedges = set()
     hyperedge_times_map = defaultdict(set)
@@ -155,7 +151,12 @@ def parse_benson_incidence_matrix(name,
         min_size_limit = 2
         print('Filtering size for [{}, {}]'.format(min_size_limit, max_size_limit))
         S, times = filter_size(S, times, min_size_limit, max_size_limit)
+
     S, times, id_label_map = filter_time(S, times, id_label_map, st_time or -1, en_time or -1)
+
+    if split_mode == 'structural':  # WARNING: DO NOT MOVE THIS FROM HERE; IT HAS TO BE THE LAST STEP
+        times = np.array([0]*times.shape[0])
+        print('WARNING: Time information is defaulted to all zeros (0) since structural mode')
     return S, times, id_label_map
 
 
