@@ -158,6 +158,7 @@ def parse_benson_incidence_matrix(name,
     if split_mode == 'structural':  # WARNING: DO NOT MOVE THIS FROM HERE; IT HAS TO BE THE LAST STEP
         times = np.array([0]*times.shape[0])
         print('WARNING: Time information is defaulted to all zeros (0) since structural mode')
+    print('DATA STATS: S.shape = {}'.format(S.shape))
     return S, times, id_label_map
 
 

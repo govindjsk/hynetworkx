@@ -9,7 +9,7 @@ from src.utils import get_base_path
 
 base_path = get_base_path()
 default_time_filter_params = (None, None)
-data_time_filter_params_map = {'coauth-DBLP': (2007, 2017),
+data_time_filter_params_map = {'coauth-DBLP': (2013, 2017),
                                'threads-math-sx': (206041827210, None),  # Took last 100000 posts
                                'tags-math-sx': (217219821220, None),  # Took last 100000 posts
                                }
@@ -65,10 +65,12 @@ def prepare_temporal_lp_data(S, weighted, times, rho, neg_ratio=-1, mode='random
 def prepare_lp_data(S, weighted, times, rho, neg_ratio=-1, mode='random'):
     if all([x == 0 for x in times]):
         print('Going for a structural split')
-        return prepare_structural_lp_data(S, weighted, rho, neg_ratio, mode)
+        lp_data = prepare_structural_lp_data(S, weighted, rho, neg_ratio, mode)
     else:
         print('Going for a temporal split')
-        return prepare_temporal_lp_data(S, weighted, times, rho, neg_ratio, mode)
+        lp_data = prepare_temporal_lp_data(S, weighted, times, rho, neg_ratio, mode)
+    print('LP DATA STATS: S_train.shape = {}, A_test.nnz = {}'.format(lp_data['S_train'].shape, lp_data['A_test'].nnz))
+    return lp_data
 
 
 def prepare_structural_lp_data(S, weighted, rho, neg_ratio=-1, mode='random'):
