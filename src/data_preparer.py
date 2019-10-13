@@ -73,6 +73,7 @@ def prepare_lp_data(S, weighted, times, rho, neg_ratio=-1, mode='random'):
 
 def prepare_structural_lp_data(S, weighted, rho, neg_ratio=-1, mode='random'):
     A = S_to_A(S, weighted, silent=False)
+    print('Splitting into train/test...')
     A_train, A_test, A_test_pos = split_train_test(A, weighted, rho)
     A_test_neg = get_neg_data(A, A_test_pos, neg_ratio, mode)
     S_train = clean_train_hypergraph(S, A_test_pos)
@@ -130,33 +131,25 @@ def S_to_A_timed(S, weighted, times):
 
 
 def split_train_test(A, weighted, rho):
-    if (weighted == False):
-        I, J = triu(A).nonzero()
-        edges = set(zip(I, J))
-        # print(edges)
-        test_edges = random.sample(edges, int(rho * len(edges)))
-        test_I, test_J = zip(*test_edges)
-        A_test = csr_matrix(([1] * len(test_I + test_J), (test_I + test_J, test_J + test_I)), shape=A.shape)
-        train_edges = edges.difference(test_edges)
-        train_I, train_J = zip(*train_edges)
-        A_train = csr_matrix(([1] * len(train_I + train_J), (train_I + train_J, train_J + train_I)), shape=A.shape)
-        assert ((A_train + A_test) != A).nnz == 0, "Error in train-test split"
-        A_test_pos = A_test
-        return A_train, A_test, A_test_pos
-    elif (weighted == True):
-        I, J = triu(A).nonzero()
-        edges = set(zip(I, J))
-        test_edges = random.sample(edges, int(rho * len(edges)))
-        test_I, test_J = zip(*test_edges)
-        test_V = [A[i, j] for i, j in zip(test_I, test_J)] + [A[j, i] for i, j in zip(test_I, test_J)]
-        A_test = csr_matrix((test_V, (test_I + test_J, test_J + test_I)), shape=A.shape)
-        train_edges = edges.difference(test_edges)
-        train_I, train_J = zip(*train_edges)
-        train_V = [A[i, j] for i, j in zip(train_I, train_J)] + [A[j, i] for i, j in zip(train_I, train_J)]
-        A_train = csr_matrix((train_V, (train_I + train_J, train_J + train_I)), shape=A.shape)
-        assert ((A_train + A_test) != A).nnz == 0, "Error in train-test split"
-        A_test_pos = A_test
-        return A_train, A_test, A_test_pos
+    I, J = triu(A).nonzero()
+    edges = set(zip(I, J))
+    print('STEP 1: Sampling test edges...')
+    test_edges = list(random.sample(edges, int(rho * len(edges))))
+    test_I, test_J = list(zip(*test_edges))
+
+    print('STEP 2: Preparing test data...')
+    test_V = ([1] * len(test_I + test_J)) if not weighted else \
+        ([A[i, j] for i, j in test_edges] + [A[j, i] for i, j in test_edges])
+    A_test = csr_matrix((test_V, (test_I + test_J, test_J + test_I)), shape=A.shape)
+
+    print('STEP 3: Preparing train data...')
+    train_edges = list(edges.difference(set(test_edges)))
+    train_I, train_J = list(zip(*train_edges))
+    train_V = ([1] * len(train_I + train_J)) if not weighted else \
+        ([A[i, j] for i, j in train_edges] + [A[j, i] for i, j in train_edges])
+    A_train = csr_matrix((train_V, (train_I + train_J, train_J + train_I)), shape=A.shape)
+    A_test_pos = A_test
+    return A_train, A_test, A_test_pos
 
 
 def split_train_test_temporal(A, weighted, edge_time_map, rho):
