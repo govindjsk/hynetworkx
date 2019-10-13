@@ -72,7 +72,7 @@ def prepare_lp_data(S, weighted, times, rho, neg_ratio=-1, mode='random'):
 
 
 def prepare_structural_lp_data(S, weighted, rho, neg_ratio=-1, mode='random'):
-    A = S_to_A(S, weighted)
+    A = S_to_A(S, weighted, silent=False)
     A_train, A_test, A_test_pos = split_train_test(A, weighted, rho)
     A_test_neg = get_neg_data(A, A_test_pos, neg_ratio, mode)
     S_train = clean_train_hypergraph(S, A_test_pos)
@@ -82,11 +82,21 @@ def prepare_structural_lp_data(S, weighted, rho, neg_ratio=-1, mode='random'):
     return lp_data
 
 
-def S_to_A(S, weighted):
+def S_to_A(S, weighted, silent=True):
+    if not silent:
+        print('Converting S to A')
+        print('STEP 1: Computing SS^T')
     A = S * S.T
-    if (weighted == False):
+
+    if weighted == False:
+        if not silent:
+            print('STEP 2: Binarizing A')
         A[A > 0] = 1
+    if not silent:
+        print('STEP 3: Setting diagonals to 0')
     A.setdiag(0)
+    if not silent:
+        print('STEP 4: Eliminating zeros')
     A.eliminate_zeros()
     return A
 
