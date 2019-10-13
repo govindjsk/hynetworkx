@@ -141,7 +141,7 @@ def split_train_test(A, rho):
     # test_V = ([1] * len(test_I + test_J)) if not weighted else \
     #     ([A[i, j] for i, j in test_edges] + [A[j, i] for i, j in test_edges])
     print('Filling in A_test...')
-    A_test = csr_matrix((test_V, (test_I + test_J)), shape=A.shape)
+    A_test = csr_matrix((test_V, (test_I, test_J)), shape=A.shape)
     A_test = A_test + A_test.T
 
     print('STEP 3: Preparing train data...')
@@ -150,7 +150,7 @@ def split_train_test(A, rho):
     # train_V = ([1] * len(train_I + train_J)) if not weighted else \
     #     ([A[i, j] for i, j in train_edges] + [A[j, i] for i, j in train_edges])
     print('Filling in A_train...')
-    A_train = csr_matrix((train_V, (train_I + train_J)), shape=A.shape)
+    A_train = csr_matrix((train_V, (train_I, train_J)), shape=A.shape)
     A_train = A_train + A_train.T
     A_test_pos = A_test
     return A_train, A_test, A_test_pos
