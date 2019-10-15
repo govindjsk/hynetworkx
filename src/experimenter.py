@@ -315,14 +315,16 @@ def parse_params():
 def perform_GWH_classification(params, G_feats, W_feats, H_feats, classifier):
     feat_combs = [G_feats, W_feats, H_feats, G_feats + H_feats, W_feats + H_feats]
     params['classifier_params'] = {'classifier': classifier}
-    print('Iterating over feature combinations...')
-    for comb in tqdm(feat_combs):
+    # print('Iterating over feature combinations...')
+    classifier_outputs = {}
+    for comb in (feat_combs):
         params['classifier_params']['features'] = comb
-        _ = perform_classification(params['data_params'],
+        classifier_outputs[tuple(comb)] = perform_classification(params['data_params'],
                                    params['lp_data_params'],
                                    params['lp_params'],
                                    params['classifier_params'],
                                    params['iter_var'])
+    return classifier_outputs
 
 
 def main(mode='plp'):
@@ -337,11 +339,12 @@ def main(mode='plp'):
         mcm = mixed_combinations_map
         # For individual 10 lp algorithms scores:
         print('For each LP col, finding GWH scores...')
+        outputs = {}
         for lp_col in tqdm(default_lp_cols):
             G_feats = [lp_col]
             W_feats = ['w_{}'.format(lp_col)]
             H_feats = mcm[lp_col][1:]
-            perform_GWH_classification(params, G_feats, W_feats, H_feats, 'xgboost')
+            outputs[lp_col] = perform_GWH_classification(params, G_feats, W_feats, H_feats, 'xgboost')
         # For all scores at once:
         print('Finding GWH scores for all scores at once...')
         G_feats = default_lp_cols

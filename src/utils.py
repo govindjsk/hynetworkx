@@ -50,7 +50,27 @@ def is_iterable(item):
 
 
 def get_data_abbr(data_name):
-    return ''.join([x[0].upper() + x[1].lower() for x in data_name.split('-')])
+    data_abbr_map = {'email-Enron': 'mail',
+                     'tags-math-sx': 'tag',
+                     'threads-math-sx': 'thread',
+                     'coauth-DBLP': 'dblp',
+                     'NDC-substances': 'ndc',
+                     'contact-high-school': 'contact'}
+    return data_abbr_map[data_name]
+    # return ''.join([x[0].upper() + x[1].lower() for x in ])
+
+
+def get_data_names():
+    return ['email-Enron',
+            'contact-high-school',
+            'NDC-substances',
+            'tags-math-sx',
+            'threads-math-sx',
+            'coauth-DBLP']
+
+
+def get_data_idx(data_name):
+    return get_data_names().index(data_name)
 
 
 def mkdir_p(path):
@@ -64,8 +84,8 @@ def mkdir_p(path):
 
 
 def get_base_path():
-    return '/home2/e1-313-15477'
+    return '/home/govinds/repos/data/'
 
 
 def get_library_path():
-    return '/home2/e1-313-15477'
+    return '/home/govinds/repos/'
