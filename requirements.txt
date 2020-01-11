@@ -8,3 +8,4 @@ pandas
 nose
 sklearn
 numpy
+tabulate
