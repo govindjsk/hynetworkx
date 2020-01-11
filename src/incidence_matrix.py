@@ -8,6 +8,7 @@ from src.data_preparer import filter_size, filter_time
 from .utils import print_matrix, _or, get_printable_matrix, get_base_path
 from .vertex import Vertex
 from scipy.sparse import csr_matrix
+import networkx as nx
 from joblib import Memory
 data_path = get_base_path()
 cachedir = os.path.join(data_path, 'cache')
@@ -86,80 +87,183 @@ def get_benson_incidence_matrix(name, base_path=None, ignore_time=True, force_pa
     f.close()
     return S
 
+
 @memory.cache
-def parse_benson_incidence_matrix(name,
-                                  base_path=None,
-                                  split_mode=None,
-                                  max_size_limit=None,
-                                  st_time=None,
-                                  en_time=None):
-    base_path = base_path or DATA_DEFAULTS['base_path_benson']
-    path = os.path.join(base_path, name)
-    nverts_path = os.path.join(path, name + '-nverts.txt')
-    simplices_path = os.path.join(path, name + '-simplices.txt')
-    times_path = os.path.join(path, name + '-times.txt')
-    print('Reading nverts...')
-    nverts = [int(l.rstrip('\n')) for l in tqdm(open(nverts_path, 'r'))]
-    # TODO: Remember that we are reindexing vertices to 0-index.
-    #  This has to be followed while initializing labels as well.
-    print('Reading simplices...')
-    simplices = [int(l.rstrip('\n')) - 1 for l in tqdm(open(simplices_path, 'r'))]
-    labels_path = os.path.join(path, name + '-node-labels.txt')
-    vertices = list(sorted(set(simplices)))
-    n = max(vertices) + 1
+def parse_benson_incidence_matrix(name,base_path=None,split_mode=None,max_size_limit=None,st_time=None,en_time=None):
+    
+    ase_path = base_path or DATA_DEFAULTS['base_path_benson']
+    path = os.path.join(base_path, name)  
+    
     try:
-        print('Reading labels...')
-        labels = [l.rstrip('\n') for l in tqdm(open(labels_path, 'r'))]
-        labels = [' '.join(l.split(' ')[1:]) for l in labels]
-    except FileNotFoundError:
-        print('No labels found.')
-        labels = ['vertex_{}'.format(i) for i in range(n)]
-    print('Reading times...')
-    times = [float(l.rstrip('\n')) for l in tqdm(open(times_path, 'r'))]
-    hyperedges = set()
-    hyperedge_times_map = defaultdict(set)
-    hyperedge_list = []
-    rows = []
-    cols = []
-    j = 0
-    print('Parsing simplices...')
-    i = 0
-    iterator = list(zip(nverts, times))
-    for nv, time in tqdm(iterator):
-        hyperedge = frozenset(simplices[i: i + nv])
-        hyperedge_times_map[hyperedge].add(time)
-        if hyperedge not in hyperedges:
-            hyperedges.add(hyperedge)
-            rows.extend(list(hyperedge))
-            cols.extend([j] * len(hyperedge))
-            hyperedge_list.append(hyperedge)
-            j += 1
-        # else:
-        #     hyperedge_time_map[hyperedge] = min([hyperedge_time_map[hyperedge], time])
-        i += nv
-    m = len(hyperedges)
-    print('Creating sparse matrix...')
-    print(len(rows), len(cols), n, m)
-    S = csr_matrix(([1] * len(rows), (rows, cols)), shape=(n, m))
-    print('Preparing vertex list...')
-    vertex_list = [Vertex(i, labels[i]) for i in tqdm(range(n))]
+        file_name = os.path.join(path, name + '_native.edges')
+        f = open(file_name, "r")
+        edgelist=[]
+        for line in f:
+            a = int(line.split(' ')[0].strip())  # \t
+            b = int(line.split(' ')[1].strip())
+            if (a!= b):
+                edge=[a,b]
+                edgelist.append(edge)
+        graph = nx.Graph()
+        graph.add_edges_from(edgelist)
+        A=nx.adj_matrix(graph)
+#         A=adj
+#         test_pairs = list(zip(*triu(A).nonzero()))
+#         print(len(test_pairs))
+        G = nx.from_scipy_sparse_matrix(A)
+        S=nx.incidence_matrix(G)
+        times=[]
+        for i in range(len(edgelist)):
+            times.append(0)
+        id_label_map={}
+        f.close()
+        return S, np.array(times), id_label_map
+    
+    except IOError:
+        nverts_path = os.path.join(path, name + '-nverts.txt')
+        simplices_path = os.path.join(path, name + '-simplices.txt')
+        times_path = os.path.join(path, name + '-times.txt')
+        print('Reading nverts...')
+        nverts = [int(l.rstrip('\n')) for l in tqdm(open(nverts_path, 'r'))]
+        # TODO: Remember that we are reindexing vertices to 0-index.
+        #  This has to be followed while initializing labels as well.
+        print('Reading simplices...')
+        simplices = [int(l.rstrip('\n')) - 1 for l in tqdm(open(simplices_path, 'r'))]
+        labels_path = os.path.join(path, name + '-node-labels.txt')
+        vertices = list(sorted(set(simplices)))
+        n = max(vertices) + 1
+        try:
+            print('Reading labels...')
+            labels = [l.rstrip('\n') for l in tqdm(open(labels_path, 'r'))]
+            labels = [' '.join(l.split(' ')[1:]) for l in labels]
+        except FileNotFoundError:
+            print('No labels found.')
+            labels = ['vertex_{}'.format(i) for i in range(n)]
+        print('Reading times...')
+        times = [float(l.rstrip('\n')) for l in tqdm(open(times_path, 'r'))]
+        hyperedges = set()
+        hyperedge_times_map = defaultdict(set)
+        hyperedge_list = []
+        rows = []
+        cols = []
+        j = 0
+        print('Parsing simplices...')
+        i = 0
+        iterator = list(zip(nverts, times))
+        for nv, time in tqdm(iterator):
+            hyperedge = frozenset(simplices[i: i + nv])
+            hyperedge_times_map[hyperedge].add(time)
+            if hyperedge not in hyperedges:
+                hyperedges.add(hyperedge)
+                rows.extend(list(hyperedge))
+                cols.extend([j] * len(hyperedge))
+                hyperedge_list.append(hyperedge)
+                j += 1
+            # else:
+            #     hyperedge_time_map[hyperedge] = min([hyperedge_time_map[hyperedge], time])
+            i += nv
+        m = len(hyperedges)
+        print('Creating sparse matrix...')
+        print(len(rows), len(cols), n, m)
+        S = csr_matrix(([1] * len(rows), (rows, cols)), shape=(n, m))
+        print('Preparing vertex list...')
+        vertex_list = [Vertex(i, labels[i]) for i in tqdm(range(n))]
 
-    print('Recalculating hyperedge times...')
-    times = np.array([min(hyperedge_times_map[hyperedge_list[j]]) for j in tqdm(range(S.shape[1]))])
+        print('Recalculating hyperedge times...')
+        times = np.array([min(hyperedge_times_map[hyperedge_list[j]]) for j in tqdm(range(S.shape[1]))])
 
-    id_label_map = {v.id: v.label for v in vertex_list}
-    if split_mode == 'structural':
-        min_size_limit = 2
-        print('Filtering size for [{}, {}]'.format(min_size_limit, max_size_limit))
-        S, times = filter_size(S, times, min_size_limit, max_size_limit)
+        id_label_map = {v.id: v.label for v in vertex_list}
+        if split_mode == 'structural':
+            min_size_limit = 2
+            print('Filtering size for [{}, {}]'.format(min_size_limit, max_size_limit))
+            S, times = filter_size(S, times, min_size_limit, max_size_limit)
 
-    S, times, id_label_map = filter_time(S, times, id_label_map, st_time or -1, en_time or -1)
+        S, times, id_label_map = filter_time(S, times, id_label_map, st_time or -1, en_time or -1)
 
-    if split_mode == 'structural':  # WARNING: DO NOT MOVE THIS FROM HERE; IT HAS TO BE THE LAST STEP
-        times = np.array([0]*times.shape[0])
-        print('WARNING: Time information is defaulted to all zeros (0) since structural mode')
-    print('DATA STATS: S.shape = {}'.format(S.shape))
-    return S, times, id_label_map
+        if split_mode == 'structural':  # WARNING: DO NOT MOVE THIS FROM HERE; IT HAS TO BE THE LAST STEP
+            times = np.array([0]*times.shape[0])
+            print('WARNING: Time information is defaulted to all zeros (0) since structural mode')
+        print('DATA STATS: S.shape = {}'.format(S.shape))
+        return S, times, id_label_map
+    
+   
+    
+
+
+# @memory.cache
+# def parse_benson_incidence_matrix(name,
+#                                   base_path=None,
+#                                   split_mode=None,
+#                                   max_size_limit=None,
+#                                   st_time=None,
+#                                   en_time=None):
+#     base_path = base_path or DATA_DEFAULTS['base_path_benson']
+#     path = os.path.join(base_path, name)
+#     nverts_path = os.path.join(path, name + '-nverts.txt')
+#     simplices_path = os.path.join(path, name + '-simplices.txt')
+#     times_path = os.path.join(path, name + '-times.txt')
+#     print('Reading nverts...')
+#     nverts = [int(l.rstrip('\n')) for l in tqdm(open(nverts_path, 'r'))]
+#     # TODO: Remember that we are reindexing vertices to 0-index.
+#     #  This has to be followed while initializing labels as well.
+#     print('Reading simplices...')
+#     simplices = [int(l.rstrip('\n')) - 1 for l in tqdm(open(simplices_path, 'r'))]
+#     labels_path = os.path.join(path, name + '-node-labels.txt')
+#     vertices = list(sorted(set(simplices)))
+#     n = max(vertices) + 1
+#     try:
+#         print('Reading labels...')
+#         labels = [l.rstrip('\n') for l in tqdm(open(labels_path, 'r'))]
+#         labels = [' '.join(l.split(' ')[1:]) for l in labels]
+#     except FileNotFoundError:
+#         print('No labels found.')
+#         labels = ['vertex_{}'.format(i) for i in range(n)]
+#     print('Reading times...')
+#     times = [float(l.rstrip('\n')) for l in tqdm(open(times_path, 'r'))]
+#     hyperedges = set()
+#     hyperedge_times_map = defaultdict(set)
+#     hyperedge_list = []
+#     rows = []
+#     cols = []
+#     j = 0
+#     print('Parsing simplices...')
+#     i = 0
+#     iterator = list(zip(nverts, times))
+#     for nv, time in tqdm(iterator):
+#         hyperedge = frozenset(simplices[i: i + nv])
+#         hyperedge_times_map[hyperedge].add(time)
+#         if hyperedge not in hyperedges:
+#             hyperedges.add(hyperedge)
+#             rows.extend(list(hyperedge))
+#             cols.extend([j] * len(hyperedge))
+#             hyperedge_list.append(hyperedge)
+#             j += 1
+#         # else:
+#         #     hyperedge_time_map[hyperedge] = min([hyperedge_time_map[hyperedge], time])
+#         i += nv
+#     m = len(hyperedges)
+#     print('Creating sparse matrix...')
+#     print(len(rows), len(cols), n, m)
+#     S = csr_matrix(([1] * len(rows), (rows, cols)), shape=(n, m))
+#     print('Preparing vertex list...')
+#     vertex_list = [Vertex(i, labels[i]) for i in tqdm(range(n))]
+
+#     print('Recalculating hyperedge times...')
+#     times = np.array([min(hyperedge_times_map[hyperedge_list[j]]) for j in tqdm(range(S.shape[1]))])
+
+#     id_label_map = {v.id: v.label for v in vertex_list}
+#     if split_mode == 'structural':
+#         min_size_limit = 2
+#         print('Filtering size for [{}, {}]'.format(min_size_limit, max_size_limit))
+#         S, times = filter_size(S, times, min_size_limit, max_size_limit)
+
+#     S, times, id_label_map = filter_time(S, times, id_label_map, st_time or -1, en_time or -1)
+
+#     if split_mode == 'structural':  # WARNING: DO NOT MOVE THIS FROM HERE; IT HAS TO BE THE LAST STEP
+#         times = np.array([0]*times.shape[0])
+#         print('WARNING: Time information is defaulted to all zeros (0) since structural mode')
+#     print('DATA STATS: S.shape = {}'.format(S.shape))
+#     return S, times, id_label_map
 
 
 def main():
