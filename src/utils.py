@@ -84,8 +84,10 @@ def mkdir_p(path):
 
 
 def get_base_path():
-    return '/home/govinds/repos/data/'
+    return '/home2/e1-313-15477/'
+#     return '/home/govinds/repos/data/'
 
 
 def get_library_path():
-    return '/home/govinds/repos/'
+    return '/home2/e1-313-15477/'
+#     return '/home/govinds/repos/

@@ -6,8 +6,8 @@ from pprint import pprint
 
 from tqdm import tqdm
 
-sys.path.append('../')
-from src.utils import get_data_abbr, mkdir_p, get_base_path, get_library_path
+# sys.path.append('../')
+from utils import get_data_abbr, mkdir_p, get_base_path, get_library_path
 import pandas as pd
 # from scipy.stats import kendalltau
 import numpy as np
@@ -16,13 +16,13 @@ library_path = get_library_path()
 sys.path.append(library_path)
 sys.path.append(os.path.join(library_path, "hynetworkx"))
 
-from src.data_preparer import filter_size, prepare_lp_data, get_time_filter_params
-from src.hypergraph_link_predictor import get_hypergraph_scores, hypergraph_score_abbr_map, all_hypergraph_score_names
-from src.link_predictor import get_perf_df
-from src.linkpred_predictor import get_linkpred_scores, predictor_abbr_map, all_predictor_names
-from src.supervised_link_predictor import classify
+from data_preparer import filter_size, prepare_lp_data, get_time_filter_params
+from hypergraph_link_predictor import get_hypergraph_scores, hypergraph_score_abbr_map, all_hypergraph_score_names
+from link_predictor import get_perf_df
+from linkpred_predictor import get_linkpred_scores, predictor_abbr_map, all_predictor_names
+from supervised_link_predictor import classify
 
-from src.incidence_matrix import parse_benson_incidence_matrix as parse_S
+from incidence_matrix import parse_benson_incidence_matrix as parse_S
 
 from joblib import Memory
 

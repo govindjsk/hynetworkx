@@ -5,7 +5,7 @@ from collections import defaultdict
 from tqdm import tqdm
 import sys
 
-from src.utils import get_base_path
+from utils import get_base_path
 
 base_path = get_base_path()
 default_time_filter_params = (None, None)
@@ -25,8 +25,9 @@ def filter_size(X, times, min_size=0, max_size=-1):
     if max_size == -1:
         max_size = X.shape[0]
     x = X.sum(axis=0)
-    _filter = ((x <= max_size) & (x >= min_size)).nonzero()[1]
-    times = times[_filter]
+    _filter = ((x <= max_size) & (x >= min_size)).nonzero()[1] 
+    if times is not None:
+        times = times[_filter]
     X = X[:, _filter]
     return X, times
 
@@ -349,19 +350,21 @@ def prepare_node_hyperneighbors_map(S):
     return node_hnbrs_map
 
 
-def clean_train_hypergraph(S, A_test_pos):
+def clean_train_hypergraph(S, A_test_pos, silent = True):
     I, J = triu(A_test_pos).nonzero()
     indices = list(zip(I, J))
-    S_hyperedges = incidence_to_hyperedges(S, silent_mode=False)
+    S_hyperedges = incidence_to_hyperedges(S, silent_mode=silent)
 
     node_hnbrs_map = defaultdict(set)
-    print('Precomputing node-hyperneighbor map...')
-    for f in tqdm(S_hyperedges):
+    if not silent:
+        print('Precomputing node-hyperneighbor map...')
+    for f in tqdm(S_hyperedges) if not silent else S_hyperedges:
         for v in f:
             node_hnbrs_map[v].add(f)
 
-    print('Splitting hyperedges and getting S_train...')
-    for i, j in tqdm(indices):
+    if not silent:
+        print('Splitting hyperedges and getting S_train...')
+    for i, j in tqdm(indices) if not silent else indices:
         i_hnbrs = node_hnbrs_map[i]
         j_hnbrs = node_hnbrs_map[j]
         common_hyperedges = i_hnbrs.intersection(j_hnbrs)
@@ -392,6 +395,8 @@ def clean_train_hypergraph(S, A_test_pos):
         # V_new = hyperedges_to_incidence(new_hyperedges, V.shape[0])
         # S = hstack([S, V_new]).tocsr().astype(dtype=int)
     S = hyperedges_to_incidence(S_hyperedges, S.shape[0])
+    S ,_ = filter_size(S, None, min_size=2, max_size=-1)
+
     return S
 
 

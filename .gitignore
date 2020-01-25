@@ -3,3 +3,7 @@ tests/.pytest_cache
 src/__pycache__
 workshop
 .idea/*
+src/tags-*
+src/email-*
+src/contact-*
+src/NDC-*

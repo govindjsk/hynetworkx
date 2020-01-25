@@ -1,7 +1,7 @@
 import os
 import sys
 
-from src.utils import get_library_path
+from utils import get_library_path
 
 library_path = get_library_path()
 sys.path.append(library_path)

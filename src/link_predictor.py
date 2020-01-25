@@ -8,15 +8,15 @@ from sklearn.metrics import roc_auc_score, precision_score, recall_score, fbeta_
 from tqdm import tqdm
 import sys
 
-from .utils import get_library_path, get_base_path
+from utils import get_library_path, get_base_path
 
 library_path = get_library_path()
 sys.path.append(library_path)
 sys.path.append(os.path.join(library_path, "hynetworkx"))
 base_path = get_base_path()
 
-from src.hypergraph_link_predictor import store_hypergraph_scores
-from src.linkpred_predictor import store_linkpred_scores
+from hypergraph_link_predictor import store_hypergraph_scores
+from linkpred_predictor import store_linkpred_scores
 
 
 def get_perf_df(scores_df, linkpred_cols, hypergraph_cols):

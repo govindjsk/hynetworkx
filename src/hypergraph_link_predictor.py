@@ -8,8 +8,8 @@ from collections import defaultdict
 from tqdm import tqdm
 import sys
 
-from src.data_preparer import S_to_A, S_to_B, incidence_to_hyperedges, prepare_node_hyperneighbors_map
-from src.utils import get_library_path, get_base_path
+from data_preparer import S_to_A, S_to_B, incidence_to_hyperedges, prepare_node_hyperneighbors_map
+from utils import get_library_path, get_base_path
 
 library_path = get_library_path()
 sys.path.append(library_path)

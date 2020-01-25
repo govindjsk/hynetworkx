@@ -3,10 +3,10 @@ import os
 from collections import defaultdict
 from tqdm import tqdm
 import numpy as np
-from src.adjacency_matrix import AdjacencyMatrix
-from src.data_preparer import filter_size, filter_time
-from .utils import print_matrix, _or, get_printable_matrix, get_base_path
-from .vertex import Vertex
+from adjacency_matrix import AdjacencyMatrix
+from data_preparer import filter_size, filter_time
+from utils import print_matrix, _or, get_printable_matrix, get_base_path
+from vertex import Vertex
 from scipy.sparse import csr_matrix
 import networkx as nx
 from joblib import Memory
