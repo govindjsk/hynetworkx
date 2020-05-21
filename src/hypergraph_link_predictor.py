@@ -5,7 +5,7 @@ import pandas as pd
 from scipy.sparse import triu
 import pickle
 from collections import defaultdict
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 import sys
 
 from data_preparer import S_to_A, S_to_B, incidence_to_hyperedges, prepare_node_hyperneighbors_map

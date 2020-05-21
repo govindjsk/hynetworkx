@@ -10,7 +10,7 @@ from src.hyperedge_set import HyperedgeSet, generate_hyperedge_set_from_vertices
     generate_edge_set_from_vertices
 from src.incidence_matrix import IncidenceMatrix
 from src.vertex_set import VertexSet, generate_monotonic_vertex_set
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 
 HYPERGRAPH_DEFAULTS = {'num_vertices': 5,
                        'num_hyperedges': 10,

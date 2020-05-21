@@ -8,7 +8,7 @@ import os
 import networkx as nx
 import pickle
 from sklearn.metrics import roc_auc_score, precision_score, recall_score, fbeta_score
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 import sys
 
 from utils import get_library_path, get_base_path

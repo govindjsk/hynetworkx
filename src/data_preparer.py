@@ -2,7 +2,7 @@ import random
 import numpy as np
 from scipy.sparse import csr_matrix, triu, hstack, find
 from collections import defaultdict
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 import sys
 
 from utils import get_base_path
@@ -173,7 +173,10 @@ def split_train_test_temporal(A, weighted, edge_time_map, rho):
     test_edges = [e for e in edge_time_map if edge_time_map[e] > train_end_time]
 
     if (weighted == False):
-        test_I, test_J = zip(*test_edges)
+        try:
+            test_I, test_J = zip(*test_edges)
+        except ValueError:
+            test_I, test_J = [], []
         A_test = csr_matrix(([1] * len(test_I + test_J), (test_I + test_J, test_J + test_I)), shape=A.shape)
         train_I, train_J = zip(*train_edges)
         A_train = csr_matrix(([1] * len(train_I + train_J), (train_I + train_J, train_J + train_I)), shape=A.shape)
@@ -182,7 +185,10 @@ def split_train_test_temporal(A, weighted, edge_time_map, rho):
         return A_train, A_test, A_test_pos, train_end_time
 
     if (weighted == True):
-        test_I, test_J = zip(*test_edges)
+        try:
+            test_I, test_J = zip(*test_edges)
+        except ValueError:
+            test_I, test_J = [], []
         test_V = [A[i, j] for i, j in zip(test_I, test_J)] + [A[j, i] for i, j in zip(test_I, test_J)]
         A_test = csr_matrix((test_V, (test_I + test_J, test_J + test_I)), shape=A.shape)
         train_I, train_J = zip(*train_edges)

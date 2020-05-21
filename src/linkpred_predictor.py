@@ -11,7 +11,7 @@ import pandas as pd
 from scipy.sparse import triu
 import networkx as nx
 import pickle
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 
 base_path = '/content/gdrive/My Drive/Colab Notebooks/data/'
 
@@ -75,26 +75,26 @@ def get_linkpred_scores(lp_data, weighted, predictor_indices=None, include_train
         for i in tqdm(range(len(predictors)), 'Predictor: '):
             predictor = predictors[i]
             abbr = predictor_abbr_map[predictor_names[i]]
-            print('Preparing predictor {}'.format(abbr))
+            # print('Preparing predictor {}'.format(abbr))
             pred = predictor(G_train, strictly_included=pairs)
-            print('Performing prediction...')
+            # print('Performing prediction...')
             try:
                 results = pred.predict(weight='weight')
             except TypeError:
                 print("predict() got an unexpected keyword argument 'weight'")
                 results = pred.predict()
-            print('Done')
+            # print('Done')
             scores[abbr] = {k: results[k] for k in pairs}
         scores_df = pd.DataFrame(scores)
     else:
         for i in tqdm(range(len(predictors)), 'Predictor: '):
             predictor = predictors[i]
             abbr = predictor_abbr_map[predictor_names[i]]
-            print('Preparing predictor {}'.format(abbr))
+            # print('Preparing predictor {}'.format(abbr))
             pred = predictor(G_train, strictly_included=pairs)
-            print('Performing prediction...')
+            # print('Performing prediction...')
             results = pred.predict()
-            print('Done')
+            # print('Done')
             scores[abbr] = {k: results[k] for k in pairs}
         scores_df = pd.DataFrame(scores)
     return scores_df
@@ -107,13 +107,13 @@ def store_linkpred_scores(G_train, test_pairs, file_prefix, predictor_indices=No
     for i in tqdm(range(len(predictors)), 'Predictor: '):
         predictor = predictors[i]
         abbr = predictor_abbr_map[predictor_names[i]]
-        print('Preparing predictor {}'.format(abbr))
+        # print('Preparing predictor {}'.format(abbr))
         pred = predictor(G_train, strictly_included=test_pairs)
-        print('Performing prediction...')
+        # print('Performing prediction...')
         scores = pred.predict()
         scores = [scores[k] for k in test_pairs]
-        print('Done')
+        # print('Done')
         file_path = file_prefix + '_' + abbr
-        print('Pickling into {}'.format(file_path))
+        # print('Pickling into {}'.format(file_path))
         pickle.dump(scores, open(file_path, 'wb'))
         del scores

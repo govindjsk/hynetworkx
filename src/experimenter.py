@@ -163,12 +163,12 @@ def perform_link_prediction(data_params, lp_data_params, lp_params=None, ter_var
     else:
         S, times, id_label_map = data
 
-    print('PREPARING LP DATA...')
+    # print('PREPARING LP DATA...')
     rho, neg_factor, neg_mode = [lp_data_params[x] for x in
                                  ['rho', 'neg_factor', 'neg_mode']]
     weighted_lp_data = prepare_lp_data(S, True, times, rho, neg_factor, neg_mode)
 
-    print('PERFORMING LINK PREDICTION...')
+    # print('PERFORMING LINK PREDICTION...')
     if lp_params:
         linkpred_indices, hypergraph_score_indices = [lp_params[x] for x in
                                                       ['linkpred_indices', 'hypergraph_score_indices']]
@@ -362,7 +362,7 @@ def compare_rel_hyg_scores(params, num_relocations=2):
                                                   data=None)
     perf = lp_results['perf']
     perfs_rel = []
-    for i in range(num_relocations):
+    for i in tqdm(range(num_relocations), 'Relocation: '):
         print('Relocating {} out of {} times.'.format(i, num_relocations))
         relocated_data = relocate_data(data)
         _, _, lp_results = perform_link_prediction(params['data_params'],

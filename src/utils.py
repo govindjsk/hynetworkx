@@ -86,10 +86,12 @@ def mkdir_p(path):
 def get_base_path():
     # return '/home2/e1-313-15477/'
     # return '/home/govinds/repos/data/'
-    return 'C:\\cygwin64\\home\\Nidhi\\repos\\benson_data\\'
+    # return 'C:\\cygwin64\\home\\Nidhi\\repos\\benson_data\\'
+    return '/content/drive/My Drive/Colab Notebooks/benson_data/'
 
 
 def get_library_path():
     # return '/home2/e1-313-15477/'
     # return '/home/govinds/repos/
-    return 'C:\\cygwin64\\home\\Nidhi\\repos\\'
+    # return 'C:\\cygwin64\\home\\Nidhi\\repos\\'
+    return '/content/drive/My Drive/Colab Notebooks/libraries/'
