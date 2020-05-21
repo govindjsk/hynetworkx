@@ -1,3 +1,6 @@
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
 from sklearn.metrics import average_precision_score
 import pandas as pd
 from scipy.sparse import triu
@@ -21,7 +24,10 @@ from linkpred_predictor import store_linkpred_scores
 
 def get_perf_df(scores_df, linkpred_cols, hypergraph_cols):
     true = list(scores_df['label'])
-    n_pos = scores_df['label'].value_counts()[1]
+    try:
+        n_pos = scores_df['label'].value_counts()[1]
+    except KeyError:
+        n_pos = 0
     perf_scores = {}
     for c in linkpred_cols + hypergraph_cols:
         predicted = list(scores_df[c])

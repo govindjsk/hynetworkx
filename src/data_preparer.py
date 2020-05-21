@@ -137,8 +137,11 @@ def split_train_test(A, rho):
     I, J, V = find(triu(A))
     edges = set(zip(I, J, V))
     print('STEP 1: Sampling test edges...')
-    test_edges = list(random.sample(edges, int(rho * len(edges))))
-    test_I, test_J, test_V = list(zip(*test_edges))
+    test_edges = list(random.sample(edges, int(rho * len(edges)))) if rho > 0 else []
+    try:
+        test_I, test_J, test_V = list(zip(*test_edges))
+    except ValueError:
+        test_I, test_J, test_V = [], [], []
 
     print('STEP 2: Preparing test data...')
     # test_V = ([1] * len(test_I + test_J)) if not weighted else \

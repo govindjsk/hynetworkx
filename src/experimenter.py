@@ -1,28 +1,30 @@
+from random import sample
 import argparse
 import sys
 import os
 from collections import defaultdict
 from pprint import pprint
 
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 
 # sys.path.append('../')
-from utils import get_data_abbr, mkdir_p, get_base_path, get_library_path
 import pandas as pd
 # from scipy.stats import kendalltau
 import numpy as np
-
+from utils import get_library_path
 library_path = get_library_path()
 sys.path.append(library_path)
 sys.path.append(os.path.join(library_path, "hynetworkx"))
 
-from data_preparer import filter_size, prepare_lp_data, get_time_filter_params
-from hypergraph_link_predictor import get_hypergraph_scores, hypergraph_score_abbr_map, all_hypergraph_score_names
-from link_predictor import get_perf_df
-from linkpred_predictor import get_linkpred_scores, predictor_abbr_map, all_predictor_names
-from supervised_link_predictor import classify
+from src.utils import get_data_abbr, mkdir_p, get_base_path, get_library_path
+from src.data_preparer import filter_size, prepare_lp_data, get_time_filter_params, incidence_to_hyperedges, \
+    hyperedges_to_incidence
+from src.hypergraph_link_predictor import get_hypergraph_scores, hypergraph_score_abbr_map, all_hypergraph_score_names
+from src.link_predictor import get_perf_df
+from src.linkpred_predictor import get_linkpred_scores, predictor_abbr_map, all_predictor_names
+from src.supervised_link_predictor import classify
 
-from incidence_matrix import parse_benson_incidence_matrix as parse_S
+from src.incidence_matrix import parse_benson_incidence_matrix as parse_S
 
 from joblib import Memory
 
@@ -89,9 +91,9 @@ mixed_combinations_map = {'AA': ['AA', 'HAAM', 'HAAa', 'HAAl1', 'HAAl2'],
                           'Prn': ['Prn', 'HPearM', 'HPeara', 'HPearl1', 'HPearl2'], }
 
 
-@memory.cache
+# @memory.cache
 def perform_classification(data_params, lp_data_params, lp_params, classifier_params, iter_var=0):
-    _, lp_results = perform_link_prediction(data_params, lp_data_params, lp_params, iter_var)
+    _, _, lp_results = perform_link_prediction(data_params, lp_data_params, lp_params, iter_var)
     features, classifier = [classifier_params[x] for x in ['features', 'classifier']]
     classifier_output = classify(lp_results, features, classifier, iter_var)
     return classifier_output
@@ -139,8 +141,8 @@ def populate_and_store_classifier_tables(data_names, split_modes, feature_combin
     return updated_tables
 
 
-@memory.cache
-def perform_link_prediction(data_params, lp_data_params, lp_params=None, iter_var=0):
+# @memory.cache
+def perform_link_prediction(data_params, lp_data_params, lp_params=None, ter_var=0, include_train=False, data=None):
     """
     data_params: {'data_name', 'base_path', 'split_mode', 'max_size_limit'}
     lp_data_params: {'rho', 'neg_factor', 'neg_mode', 'weighted_flag'}
@@ -148,20 +150,22 @@ def perform_link_prediction(data_params, lp_data_params, lp_params=None, iter_va
 
     returns: (data, lp_data, lp_results)
     """
-    print('READING DATASET...')
-    data_name, base_path, split_mode, max_size_limit = [data_params[x] for x in
-                                                        ['data_name', 'base_path', 'split_mode', 'max_size_limit']]
+    if data is None:
+        print('READING DATASET...')
+        data_name, base_path, split_mode, max_size_limit = [data_params[x] for x in
+                                                            ['data_name', 'base_path', 'split_mode', 'max_size_limit']]
+        S, times, id_label_map = parse_S(data_name,
+                                         base_path,
+                                         split_mode,
+                                         max_size_limit,
+                                         *get_time_filter_params(data_name))
+        data = (S, times, id_label_map)
+    else:
+        S, times, id_label_map = data
 
     print('PREPARING LP DATA...')
     rho, neg_factor, neg_mode = [lp_data_params[x] for x in
                                  ['rho', 'neg_factor', 'neg_mode']]
-
-    S, times, id_label_map = parse_S(data_name,
-                                     base_path,
-                                     split_mode,
-                                     max_size_limit,
-                                     *get_time_filter_params(data_name))
-
     weighted_lp_data = prepare_lp_data(S, True, times, rho, neg_factor, neg_mode)
 
     print('PERFORMING LINK PREDICTION...')
@@ -170,21 +174,29 @@ def perform_link_prediction(data_params, lp_data_params, lp_params=None, iter_va
                                                       ['linkpred_indices', 'hypergraph_score_indices']]
     else:
         linkpred_indices, hypergraph_score_indices = None, None
-    weighted_linkpred_scores_df = get_linkpred_scores(weighted_lp_data, True, linkpred_indices)
-    unweighted_linkpred_scores_df = get_linkpred_scores(weighted_lp_data, False, linkpred_indices)
+    weighted_linkpred_scores_df = get_linkpred_scores(weighted_lp_data, True, linkpred_indices,
+                                                      include_train=include_train)
+    unweighted_linkpred_scores_df = get_linkpred_scores(weighted_lp_data, False, linkpred_indices,
+                                                        include_train=include_train)
     unweighted_linkpred_cols = list(unweighted_linkpred_scores_df.columns)
     cols_map = {c: 'w_{}'.format(c) for c in unweighted_linkpred_cols}
     weighted_linkpred_scores_df = weighted_linkpred_scores_df.rename(columns=cols_map)
     weighted_linkpred_cols = list(weighted_linkpred_scores_df.columns)
 
-    hyg_scores_df = get_hypergraph_scores(weighted_lp_data, hypergraph_score_indices)
+    hyg_scores_df = get_hypergraph_scores(weighted_lp_data, hypergraph_score_indices, include_train=include_train)
     hyg_scores_cols = list(hyg_scores_df.columns)
     scores_df = pd.merge(unweighted_linkpred_scores_df, weighted_linkpred_scores_df, left_index=True, right_index=True)
-    scores_df = pd.merge(scores_df, hyg_scores_df, left_index=True, right_index=True)
-    pos_pairs = set(zip(*weighted_lp_data['A_test_pos'].nonzero()))
+    if not hyg_scores_df.empty:
+        scores_df = pd.merge(scores_df, hyg_scores_df, left_index=True, right_index=True)
+    test_pos_pairs = set(zip(*weighted_lp_data['A_test_pos'].nonzero()))
+    pos_pairs = test_pos_pairs if not include_train else test_pos_pairs.union(
+        set(zip(*weighted_lp_data['A_train'].nonzero())))
     scores_df['label'] = scores_df.index.map(lambda x: int(x in pos_pairs))
-    perf_df = get_perf_df(scores_df, unweighted_linkpred_cols + weighted_linkpred_cols, hyg_scores_cols)
-    return weighted_lp_data, \
+    try:
+        perf_df = get_perf_df(scores_df, unweighted_linkpred_cols + weighted_linkpred_cols, hyg_scores_cols)
+    except ValueError:
+        perf_df = None
+    return data, weighted_lp_data, \
            {'scores': scores_df, 'perf': perf_df}
 
 
@@ -195,7 +207,7 @@ def populate_and_store_tables(data_names, split_modes, predictor_cols, metrics, 
         data_params['split_mode'] = split_mode
         for data_name in data_names:
             data_params['data_name'] = data_name
-            _, lp_results = perform_link_prediction(data_params, lp_data_params, lp_params)
+            _, _, lp_results = perform_link_prediction(data_params, lp_data_params, lp_params)
             for metric in metrics:
                 row = lp_results['perf'].loc[metric, predictor_cols]
                 row.name = get_data_abbr(data_name)
@@ -320,18 +332,55 @@ def perform_GWH_classification(params, G_feats, W_feats, H_feats, classifier):
     for comb in (feat_combs):
         params['classifier_params']['features'] = comb
         classifier_outputs[tuple(comb)] = perform_classification(params['data_params'],
-                                   params['lp_data_params'],
-                                   params['lp_params'],
-                                   params['classifier_params'],
-                                   params['iter_var'])
+                                                                 params['lp_data_params'],
+                                                                 params['lp_params'],
+                                                                 params['classifier_params'],
+                                                                 params['iter_var'])
     return classifier_outputs
 
 
+def relocate_data(data):
+    S, times, labels = data
+    nodes = list(range(S.shape[0]))
+    hyperedges = incidence_to_hyperedges(S)
+    rel_hyperedges = []
+    print('Relocating...')
+    for f in tqdm(hyperedges):
+        rel_f = sample(nodes, len(f))
+        rel_hyperedges.append(frozenset(rel_f))
+    print('Done!')
+    rel_S = hyperedges_to_incidence(rel_hyperedges, S.shape[0])
+    relocated_data = rel_S, times, labels
+    return relocated_data
+
+
+def compare_rel_hyg_scores(params, num_relocations=2):
+    data, _, lp_results = perform_link_prediction(params['data_params'],
+                                                  params['lp_data_params'],
+                                                  params['lp_params'],
+                                                  params['iter_var'], include_train=True,
+                                                  data=None)
+    perf = lp_results['perf']
+    perfs_rel = []
+    for i in range(num_relocations):
+        print('Relocating {} out of {} times.'.format(i, num_relocations))
+        relocated_data = relocate_data(data)
+        _, _, lp_results = perform_link_prediction(params['data_params'],
+                                                   params['lp_data_params'],
+                                                   params['lp_params'],
+                                                   params['iter_var'],
+                                                   include_train=True,
+                                                   data=relocated_data)
+        perfs_rel.append(lp_results['perf'])
+    return perf, perfs_rel
+
+
 def main(mode='plp'):
+    mode = 'crhs'
     params = parse_params()
     pprint(params)
     if mode == 'plp':
-        _, lp_results = perform_link_prediction(params['data_params'],
+        _, _, lp_results = perform_link_prediction(params['data_params'],
                                                 params['lp_data_params'],
                                                 params['lp_params'],
                                                 params['iter_var'])
@@ -351,6 +400,15 @@ def main(mode='plp'):
         W_feats = ['w_{}'.format(c) for c in default_lp_cols]
         H_feats = default_hyper_cols
         perform_GWH_classification(params, G_feats, W_feats, H_feats, 'xgboost')
+
+    elif mode == 'crhs':
+        # Compare relocated hypergraph scores
+        params['lp_data_params']['rho'] = 0.0
+        params['lp_data_params']['neg_factor'] = -1
+        params['lp_params']['hypergraph_score_indices'] = []
+        params['lp_params']['graph_score_indices'] = list(range(len(all_predictor_names)))
+        perf, perfs_rel = compare_rel_hyg_scores(params)
+        print(perf, perfs_rel)
 
 
 if __name__ == '__main__':

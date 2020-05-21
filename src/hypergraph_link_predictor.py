@@ -585,8 +585,9 @@ scoring_function_map = {'HyperJaccard': hyper_jaccard,
                         }
 
 
-def get_hypergraph_scores(lp_data, score_indices=None):
-    score_indices = score_indices or range(len(all_hypergraph_score_names))
+def get_hypergraph_scores(lp_data, score_indices=None, include_train=False):
+    if score_indices is None:
+        score_indices = range(len(all_hypergraph_score_names))
     score_names = [all_hypergraph_score_names[i] for i in score_indices]
     base_score_names = list({n[:-3] for n in score_names})
     S_train = lp_data['S_train']
@@ -594,6 +595,7 @@ def get_hypergraph_scores(lp_data, score_indices=None):
     A_test_neg = lp_data['A_test_neg']
     I, J = triu(A_test_pos + A_test_neg).nonzero()
     test_pairs = list(zip(I, J))
+    pairs = test_pairs if not include_train else test_pairs + list(zip(*triu(lp_data['A_train']).nonzero()))
     scores = {}
     node_hynbrs_map = prepare_node_hyperneighbors_map(S_train)
     for i in tqdm(range(len(base_score_names)), 'Hypergraph score: '):
@@ -602,7 +604,7 @@ def get_hypergraph_scores(lp_data, score_indices=None):
         # print(base_name)
         scoring_function = scoring_function_map[base_name]
         print('Calculating hypergraph scores: {}'.format(base_name))
-        base_scores = scoring_function(test_pairs, S_train, node_hynbrs_map)
+        base_scores = scoring_function(pairs, S_train, node_hynbrs_map)
         for prefix in base_scores:
             score_name = base_name + prefix
             # print(score_name)
