@@ -594,7 +594,7 @@ def get_hypergraph_scores(lp_data, score_indices=None, include_train=False):
     S_train = lp_data['S_train']
     A_test_pos = lp_data['A_test_pos']
     A_test_neg = lp_data['A_test_neg']
-    if A_test_neg is None:
+    if include_train:
         pairs = list(itertools.combinations(range(S_train.shape[0]), 2))
     else:
         I, J = triu(A_test_pos + A_test_neg).nonzero()

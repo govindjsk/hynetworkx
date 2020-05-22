@@ -84,7 +84,7 @@ def get_linkpred_scores(lp_data, weighted, predictor_indices=None, include_train
     A_test_pos = lp_data['A_test_pos']
     A_test_neg = lp_data['A_test_neg']
     G_train = nx.from_scipy_sparse_matrix(A_train)
-    if A_test_neg is None:
+    if include_train:
         pairs = list(itertools.combinations(range(A_train.shape[0]), 2))
     else:
         test_pairs = list(zip(*triu(A_test_pos + A_test_neg).nonzero()))
