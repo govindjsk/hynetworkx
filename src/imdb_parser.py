@@ -3,7 +3,7 @@ from collections import Counter
 from joblib import Memory
 import os
 import pandas as pd
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 from scipy.sparse import csr_matrix, triu
 import random
 
