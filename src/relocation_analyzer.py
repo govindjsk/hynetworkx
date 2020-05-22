@@ -1,23 +1,13 @@
-import sys
 import pickle
 from experimenter import *
 from utils import *
 import pandas as pd
 import numpy as np
 import os
-from itertools import product
 from tqdm.autonotebook import tqdm
-from tabulate import tabulate
-from data_preparer import S_to_A,clean_train_hypergraph
-from utils import get_library_path
 mcm = mixed_combinations_map
 if 'HDPa' in mcm['PA']:
     mcm['PA'].remove('HDPa')
-from random import seed
-from random import sample
-from scipy.sparse import csr_matrix, triu, hstack
-import itertools
-from sklearn.metrics import roc_curve, roc_auc_score
 
 
 if __name__ == '__main__':
@@ -58,7 +48,7 @@ if __name__ == '__main__':
         except FileNotFoundError:
             print('Not found pickled')
             params['data_params']['data_name'] = data_name
-            perf, perfs_rel = compare_rel_hyg_scores(params, 5)
+            perf, perfs_rel = compare_rel_hyg_scores(params, 5, True)
             df1 = perf.iloc[[1], range(10)].T.rename(columns = {'auc': data_name})
             df = pd.concat(perfs_rel)
             df = df.groupby(df.index).agg(lambda x: '${} \\pm {}$'.format('%2.4f' % round(np.mean(x), 4), '%2.4f' % round(np.std(x), 4))).iloc[[1], range(10)].T.rename(columns = {'auc': data_name})

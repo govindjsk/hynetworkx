@@ -142,7 +142,7 @@ def populate_and_store_classifier_tables(data_names, split_modes, feature_combin
 
 
 # @memory.cache
-def perform_link_prediction(data_params, lp_data_params, lp_params=None, ter_var=0, include_train=False, data=None):
+def perform_link_prediction(data_params, lp_data_params, lp_params=None, ter_var=0, include_train=False, data=None, parallel_version=False):
     """
     data_params: {'data_name', 'base_path', 'split_mode', 'max_size_limit'}
     lp_data_params: {'rho', 'neg_factor', 'neg_mode', 'weighted_flag'}
@@ -175,9 +175,9 @@ def perform_link_prediction(data_params, lp_data_params, lp_params=None, ter_var
     else:
         linkpred_indices, hypergraph_score_indices = None, None
     weighted_linkpred_scores_df = get_linkpred_scores(weighted_lp_data, True, linkpred_indices,
-                                                      include_train=include_train)
+                                                      include_train=include_train, parallel_version=parallel_version)
     unweighted_linkpred_scores_df = get_linkpred_scores(weighted_lp_data, False, linkpred_indices,
-                                                        include_train=include_train)
+                                                        include_train=include_train, parallel_version=parallel_version)
     unweighted_linkpred_cols = list(unweighted_linkpred_scores_df.columns)
     cols_map = {c: 'w_{}'.format(c) for c in unweighted_linkpred_cols}
     weighted_linkpred_scores_df = weighted_linkpred_scores_df.rename(columns=cols_map)
@@ -354,12 +354,13 @@ def relocate_data(data):
     return relocated_data
 
 
-def compare_rel_hyg_scores(params, num_relocations=2):
+def compare_rel_hyg_scores(params, num_relocations=2, parallel_version=False):
     data, _, lp_results = perform_link_prediction(params['data_params'],
                                                   params['lp_data_params'],
                                                   params['lp_params'],
                                                   params['iter_var'], include_train=True,
-                                                  data=None)
+                                                  data=None,
+                                                  parallel_version=parallel_version)
     perf = lp_results['perf']
     perfs_rel = []
     for i in tqdm(range(num_relocations), 'Relocation: '):
@@ -370,7 +371,8 @@ def compare_rel_hyg_scores(params, num_relocations=2):
                                                    params['lp_params'],
                                                    params['iter_var'],
                                                    include_train=True,
-                                                   data=relocated_data)
+                                                   data=relocated_data,
+                                                   parallel_version=parallel_version)
         perfs_rel.append(lp_results['perf'])
     return perf, perfs_rel
 
