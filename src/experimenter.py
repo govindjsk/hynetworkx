@@ -1,3 +1,5 @@
+import multiprocessing
+from concurrent.futures import as_completed, ProcessPoolExecutor
 from random import sample
 import argparse
 import sys
@@ -354,6 +356,18 @@ def relocate_data(data):
     return relocated_data
 
 
+def perform_one_relocation(params, data, parallel_version):
+    relocated_data = relocate_data(data)
+    _, _, lp_results = perform_link_prediction(params['data_params'],
+                                               params['lp_data_params'],
+                                               params['lp_params'],
+                                               params['iter_var'],
+                                               include_train=True,
+                                               data=relocated_data,
+                                               parallel_version=parallel_version)
+    return lp_results['perf']
+
+
 def compare_rel_hyg_scores(params, num_relocations=2, parallel_version=False):
     data, _, lp_results = perform_link_prediction(params['data_params'],
                                                   params['lp_data_params'],
@@ -363,17 +377,23 @@ def compare_rel_hyg_scores(params, num_relocations=2, parallel_version=False):
                                                   parallel_version=parallel_version)
     perf = lp_results['perf']
     perfs_rel = []
-    for i in tqdm(range(num_relocations), 'Relocation: '):
-        print('Relocating {} out of {} times.'.format(i, num_relocations))
-        relocated_data = relocate_data(data)
-        _, _, lp_results = perform_link_prediction(params['data_params'],
-                                                   params['lp_data_params'],
-                                                   params['lp_params'],
-                                                   params['iter_var'],
-                                                   include_train=True,
-                                                   data=relocated_data,
-                                                   parallel_version=parallel_version)
-        perfs_rel.append(lp_results['perf'])
+    if not parallel_version:
+        for i in tqdm(range(num_relocations), 'Relocation: '):
+            print('Relocating {} out of {} times.'.format(i, num_relocations))
+            perf_rel = perform_one_relocation(params, data, parallel_version)
+            perfs_rel.append(perf_rel)
+    else:
+        max_workers = min(num_relocations, multiprocessing.cpu_count())
+        pool = ProcessPoolExecutor(max_workers=max_workers)
+        process_list = []
+        for i in range(num_relocations):
+            process_list.append(pool.submit(perform_one_relocation, params, data, parallel_version))
+            print('{} of {} relocation processes scheduled'.format(len(process_list), num_relocations))
+        for p in as_completed(process_list):
+            perf_rel = p.result()
+            perfs_rel.append(perf_rel)
+            print('{} of {} relocation processes completed'.format(len(perfs_rel), len(process_list)))
+        pool.shutdown(wait=True)
     return perf, perfs_rel
 
 
