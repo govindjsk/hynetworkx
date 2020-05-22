@@ -71,32 +71,17 @@ def get_linkpred_scores(lp_data, weighted, predictor_indices=None, include_train
     test_pairs = list(zip(*triu(A_test_pos + A_test_neg).nonzero()))
     pairs = test_pairs if not include_train else test_pairs + list(zip(*triu(A_train).nonzero()))
     scores = {}
-    if weighted:
-        for i in tqdm(range(len(predictors)), 'Predictor: '):
-            predictor = predictors[i]
-            abbr = predictor_abbr_map[predictor_names[i]]
-            # print('Preparing predictor {}'.format(abbr))
-            pred = predictor(G_train, strictly_included=pairs)
-            # print('Performing prediction...')
-            try:
-                results = pred.predict(weight='weight')
-            except TypeError:
-                print("predict() got an unexpected keyword argument 'weight'")
-                results = pred.predict()
-            # print('Done')
-            scores[abbr] = {k: results[k] for k in pairs}
-        scores_df = pd.DataFrame(scores)
-    else:
-        for i in tqdm(range(len(predictors)), 'Predictor: '):
-            predictor = predictors[i]
-            abbr = predictor_abbr_map[predictor_names[i]]
-            # print('Preparing predictor {}'.format(abbr))
-            pred = predictor(G_train, strictly_included=pairs)
-            # print('Performing prediction...')
+    for i in tqdm(range(len(predictors)), 'Predictor: '):
+        predictor = predictors[i]
+        abbr = predictor_abbr_map[predictor_names[i]]
+        pred = predictor(G_train, strictly_included=pairs)
+        try:
+            results = pred.predict(weight='weight') if weighted else pred.predict()
+        except TypeError:
+            print("predict() got an unexpected keyword argument 'weight'")
             results = pred.predict()
-            # print('Done')
-            scores[abbr] = {k: results[k] for k in pairs}
-        scores_df = pd.DataFrame(scores)
+        scores[abbr] = {k: results[k] for k in pairs}
+    scores_df = pd.DataFrame(scores)
     return scores_df
 
 
