@@ -56,7 +56,10 @@ def prepare_temporal_lp_data(S, weighted, times, rho, neg_ratio=-1, mode='random
     print('Splitting train-test...')
     A_train, A_test, A_test_pos, train_end_time = split_train_test_temporal(A, weighted, edge_time_map, rho)
     print('Generating negative data')
-    A_test_neg = get_neg_data(A, A_test_pos, neg_ratio, mode)
+    try:
+        A_test_neg = get_neg_data(A, A_test_pos, neg_ratio, mode)
+    except MemoryError:
+        A_test_neg = None
     S_train = S[:, [j for j, t in enumerate(times) if t <= train_end_time]]
     lp_data = {'S_train': S_train, 'A_train': A_train, 'A_test': A_test,
                'A_test_pos': A_test_pos, 'A_test_neg': A_test_neg}
@@ -79,7 +82,10 @@ def prepare_structural_lp_data(S, weighted, rho, neg_ratio=-1, mode='random'):
     A = S_to_A(S, weighted, silent=False)
     print('Splitting into train/test...')
     A_train, A_test, A_test_pos = split_train_test(A, rho)
-    A_test_neg = get_neg_data(A, A_test_pos, neg_ratio, mode)
+    try:
+        A_test_neg = get_neg_data(A, A_test_pos, neg_ratio, mode)
+    except MemoryError:
+        A_test_neg = None
     S_train = clean_train_hypergraph(S, A_test_pos)
     lp_data = {'S_train': S_train, 'A_train': A_train, 'A_test': A_test,
                'A_test_pos': A_test_pos, 'A_test_neg': A_test_neg}

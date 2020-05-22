@@ -184,7 +184,6 @@ def perform_link_prediction(data_params, lp_data_params, lp_params=None, ter_var
     cols_map = {c: 'w_{}'.format(c) for c in unweighted_linkpred_cols}
     weighted_linkpred_scores_df = weighted_linkpred_scores_df.rename(columns=cols_map)
     weighted_linkpred_cols = list(weighted_linkpred_scores_df.columns)
-
     hyg_scores_df = get_hypergraph_scores(weighted_lp_data, hypergraph_score_indices, include_train=include_train)
     hyg_scores_cols = list(hyg_scores_df.columns)
     scores_df = pd.merge(unweighted_linkpred_scores_df, weighted_linkpred_scores_df, left_index=True, right_index=True)
