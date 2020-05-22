@@ -3,6 +3,7 @@ import numpy as np
 from scipy.sparse import csr_matrix, triu, hstack, find
 from collections import defaultdict
 from tqdm import tqdm
+import pickle
 import sys
 
 from utils import get_base_path
@@ -85,6 +86,20 @@ def prepare_structural_lp_data(S, weighted, rho, neg_ratio=-1, mode='random'):
     # assert ((lp_data['A_test_pos'] + lp_data['A_test_neg']) > 1).nnz == 0, "Negative test pairs overlap with positive."
     return lp_data
 
+
+def A_to_S(A, silent=True):
+    # WARNING: only works for graphs, not hypergraphs (obviously)!
+    if not silent:
+        print('Converting A to S')
+    pairs = zip(*triu(A).nonzero())
+    I, J = [], []
+    j = 0
+    for u, v in pairs:
+        I.extend([u, v])
+        J.extend([j, j])
+        j += 1
+    S = csr_matrix(([1]*len(I), (I, J)), shape=(A.shape[0], j))
+    return S
 
 def S_to_A(S, weighted, silent=True):
     if not silent:

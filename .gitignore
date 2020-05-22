@@ -7,3 +7,6 @@ src/tags-*
 src/email-*
 src/contact-*
 src/NDC-*
+src/dict_case*
+*.ipynb
+*.png
