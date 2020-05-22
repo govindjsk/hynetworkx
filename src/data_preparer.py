@@ -50,15 +50,15 @@ def filter_time(S, times, id_label_map, min_time=-1, max_time=-1):
     return S, times, id_label_map
 
 
-def prepare_temporal_lp_data(S, weighted, times, rho, neg_ratio=-1, mode='random'):
+def prepare_temporal_lp_data(S, weighted, times, rho, neg_ratio=-1, mode='random', include_train=False):
     print('Generating A and edge-times...')
     A, edge_time_map = S_to_A_timed(S, weighted, times)
     print('Splitting train-test...')
     A_train, A_test, A_test_pos, train_end_time = split_train_test_temporal(A, weighted, edge_time_map, rho)
     print('Generating negative data')
-    try:
+    if not include_train:
         A_test_neg = get_neg_data(A, A_test_pos, neg_ratio, mode)
-    except MemoryError:
+    else:
         A_test_neg = None
     S_train = S[:, [j for j, t in enumerate(times) if t <= train_end_time]]
     lp_data = {'S_train': S_train, 'A_train': A_train, 'A_test': A_test,
@@ -67,24 +67,24 @@ def prepare_temporal_lp_data(S, weighted, times, rho, neg_ratio=-1, mode='random
     return lp_data
 
 
-def prepare_lp_data(S, weighted, times, rho, neg_ratio=-1, mode='random'):
+def prepare_lp_data(S, weighted, times, rho, neg_ratio=-1, mode='random', include_train=False):
     if all([x == 0 for x in times]):
         print('Going for a structural split')
-        lp_data = prepare_structural_lp_data(S, weighted, rho, neg_ratio, mode)
+        lp_data = prepare_structural_lp_data(S, weighted, rho, neg_ratio, mode, include_train=include_train)
     else:
         print('Going for a temporal split')
-        lp_data = prepare_temporal_lp_data(S, weighted, times, rho, neg_ratio, mode)
+        lp_data = prepare_temporal_lp_data(S, weighted, times, rho, neg_ratio, mode, include_train=include_train)
     print('LP DATA STATS: S_train.shape = {}, A_test.nnz = {}'.format(lp_data['S_train'].shape, lp_data['A_test'].nnz))
     return lp_data
 
 
-def prepare_structural_lp_data(S, weighted, rho, neg_ratio=-1, mode='random'):
+def prepare_structural_lp_data(S, weighted, rho, neg_ratio=-1, mode='random', include_train=False):
     A = S_to_A(S, weighted, silent=False)
     print('Splitting into train/test...')
     A_train, A_test, A_test_pos = split_train_test(A, rho)
-    try:
+    if not include_train:
         A_test_neg = get_neg_data(A, A_test_pos, neg_ratio, mode)
-    except MemoryError:
+    else:
         A_test_neg = None
     S_train = clean_train_hypergraph(S, A_test_pos)
     lp_data = {'S_train': S_train, 'A_train': A_train, 'A_test': A_test,

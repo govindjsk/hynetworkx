@@ -168,7 +168,7 @@ def perform_link_prediction(data_params, lp_data_params, lp_params=None, ter_var
     # print('PREPARING LP DATA...')
     rho, neg_factor, neg_mode = [lp_data_params[x] for x in
                                  ['rho', 'neg_factor', 'neg_mode']]
-    weighted_lp_data = prepare_lp_data(S, True, times, rho, neg_factor, neg_mode)
+    weighted_lp_data = prepare_lp_data(S, True, times, rho, neg_factor, neg_mode, include_train=include_train)
 
     # print('PERFORMING LINK PREDICTION...')
     if lp_params:
