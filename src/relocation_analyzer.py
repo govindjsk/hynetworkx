@@ -29,8 +29,8 @@ if __name__ == '__main__':
                   'contact-primary-school',
                   'NDC-substances',
                   'tags-math-sx',
-                  'threads-math-sx',
-                  'coauth-DBLP'
+                  # 'threads-math-sx',
+                  # 'coauth-DBLP'
                  ]
 
     split_mode = 'temporal'
@@ -46,7 +46,7 @@ if __name__ == '__main__':
     params['lp_data_params']['rho'] = 0.0
     params['lp_data_params']['neg_factor'] = -1
     params['lp_params']['hypergraph_score_indices'] = []
-    params['lp_params']['linkpred_indices'] = [9, 6, 0, 17, 16, 8, 2, 15]
+    params['lp_params']['linkpred_indices'] = [6, 0, 17, 8, 2, 15]
 
     data_dfs = []
     data_name = parse_data_name()
